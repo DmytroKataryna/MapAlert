@@ -11,6 +11,8 @@ public class Location implements Serializable {
     private String mTitle;
     private String mDescription;
     private String mPhoto;
+    private String mTime;
+    private String mRepeat;
 
     public int getId() {
         return id;
@@ -50,5 +52,21 @@ public class Location implements Serializable {
 
     public void setPhoto(String mPhoto) {
         this.mPhoto = mPhoto;
+    }
+
+    public String getRepeat() {
+        return mRepeat;
+    }
+
+    public void setRepeat(String mRepeat) {
+        this.mRepeat = mRepeat;
+    }
+
+    public String getTime() {
+        return mTime;
+    }
+
+    public void setTime(String mTime) {
+        this.mTime = mTime;
     }
 }

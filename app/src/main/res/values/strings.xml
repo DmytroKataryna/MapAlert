@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MapAlert</string>
+    <string name="loc_activity_name">Location</string>
 </resources>
