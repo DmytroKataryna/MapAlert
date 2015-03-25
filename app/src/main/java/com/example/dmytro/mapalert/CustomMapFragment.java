@@ -13,6 +13,9 @@ import com.google.android.gms.maps.MapFragment;
 
 public class CustomMapFragment extends MapFragment {
 
+    //when place Google MapFragment into scrollView than ACTION_UP and ACTION_DOWN event will not work
+    //so i create mu custom MapFragment and handle this problem
+
     private OnTouchListener mListener;
 
     @Override

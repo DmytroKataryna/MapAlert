@@ -8,7 +8,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Address;
 import android.location.Criteria;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -20,7 +22,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -38,23 +42,30 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 import java.util.TreeSet;
 
-public class LocationActivity extends ActionBarActivity implements OnMapReadyCallback, View.OnClickListener, CompoundButton.OnCheckedChangeListener, TimePicker.OnTimeChangedListener {
+public class LocationActivity extends ActionBarActivity implements OnMapReadyCallback, View.OnClickListener, CompoundButton.OnCheckedChangeListener,
+        TimePicker.OnTimeChangedListener, View.OnFocusChangeListener {
 
-    private int counter = 1;
+    private GoogleMap mGoogleMap;
+    private EditText mSearchEditText;
     private ImageView mLocPhoto;
     private TimePicker mTimePicker;
     private TextView mRepeatTextView;
-    private LinearLayout mTimeLayout;
-    private RelativeLayout mRepeatLayout;
     private Switch mTimeSwitch;
     private CustomMapFragment mapFragment;
     private ScrollView scrollView;
     private Marker locationMarker;
-
     private LatLng coordinates;
     private String mTime;
+    private Button mSearchButton;
+
+    //layouts
+    private LinearLayout mHeadLayout, mTimeLayout;
+    private RelativeLayout mRepeatLayout;
 
     //dialog items
     private TreeSet<Integer> selectedItems = new TreeSet<>();
@@ -70,14 +81,22 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
 
+        mHeadLayout = (LinearLayout) findViewById(R.id.headLayout);
+        mHeadLayout.setOnClickListener(this);
 
         mRepeatLayout = (RelativeLayout) findViewById(R.id.repeatLayout);
         mRepeatLayout.setOnClickListener(this);
         mTimeLayout = (LinearLayout) findViewById(R.id.timeLayout);
         mTimeLayout.setVisibility(View.GONE);
 
+        mSearchEditText = (EditText) findViewById(R.id.searchEditText);
+        mSearchEditText.setOnFocusChangeListener(this);
+
         scrollView = (ScrollView) findViewById(R.id.scrollView);
         mRepeatTextView = (TextView) findViewById(R.id.repeatTextView);
+
+        mSearchButton = (Button) findViewById(R.id.imageButton);
+        mSearchButton.setOnClickListener(this);
 
         mTimeSwitch = (Switch) findViewById(R.id.timeSwitcher);
         mTimeSwitch.setOnCheckedChangeListener(this);
@@ -95,6 +114,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
             @Override
             public void onTouch() {
                 scrollView.requestDisallowInterceptTouchEvent(true);
+                scrollView.scrollTo(scrollView.getBottom(), scrollView.getBottom());
             }
         });
         mapFragment.getMapAsync(this);
@@ -102,6 +122,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
+        this.mGoogleMap = googleMap;
         googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
         googleMap.setMyLocationEnabled(true);
 
@@ -132,7 +153,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                     locationMarker.remove();
                     coordinates = null;
                 }
-
                 //set marker
                 locationMarker = googleMap.addMarker(new MarkerOptions().position(latLng));
                 coordinates = latLng;
@@ -158,6 +178,24 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
             case R.id.locationImageView:
                 createPhotoDialog();
+                break;
+
+            case R.id.imageButton:
+                LatLng location = findLocation(mSearchEditText.getText().toString());
+                if (locationMarker != null) {
+                    locationMarker.remove();
+                    coordinates = null;
+                }
+
+                mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 13));
+                locationMarker = mGoogleMap.addMarker(new MarkerOptions().position(location));
+                coordinates = location;
+                break;
+
+            //change scroll view position
+            case R.id.headLayout:
+                scrollView.scrollTo(scrollView.getTop(), scrollView.getTop());
+                mHeadLayout.setFocusable(true);
                 break;
         }
     }
@@ -189,6 +227,23 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         //get all fields data and save location to DB
         return super.onOptionsItemSelected(item);
     }
+
+    /////----------------------------------Find location by address  -------------------------------
+
+    public LatLng findLocation(String address) {
+        Geocoder gc = new Geocoder(getApplicationContext(), Locale.getDefault());
+        List<Address> addresses;
+        try {
+            addresses = gc.getFromLocationName(address, 1);
+            if (addresses.size() > 0) {
+                return new LatLng(addresses.get(0).getLatitude(), addresses.get(0).getLongitude());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new LatLng(0, 0);
+    }
+
     /////----------------------------------Photo Dialog -------------------------------
 
     private void createPhotoDialog() {
@@ -308,7 +363,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
             public void onClick(DialogInterface dialog, int which) {
 
                 mRepeatTextView.setText(convertDays(selectedItems));
-                //save selected items to DB
+
             }
         });
         //show dialog
@@ -329,8 +384,19 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         }
         builder.append(">");
 
-        //+add Weekdays Weekends
+        //+add Weekdays & Weekends when 0,1,2,3,4 selected and 5,6  selected
         return builder.toString();
+    }
+
+
+    /////---------------------------------Map Search focus Listener-----------------------------------------
+    //clear text when search is focused and scroll to bottom
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        if (v.getId() == R.id.searchEditText && hasFocus) {
+            scrollView.scrollTo(scrollView.getBottom(), scrollView.getBottom());
+            mSearchEditText.setText("");
+        }
     }
     /////--------------------------------------------------------------------------
 }
