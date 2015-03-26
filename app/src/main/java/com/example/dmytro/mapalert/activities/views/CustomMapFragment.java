@@ -1,4 +1,4 @@
-package com.example.dmytro.mapalert;
+package com.example.dmytro.mapalert.activities.views;
 
 import android.content.Context;
 import android.os.Bundle;

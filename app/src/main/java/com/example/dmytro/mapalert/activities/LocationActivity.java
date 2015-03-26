@@ -1,9 +1,7 @@
-package com.example.dmytro.mapalert;
+package com.example.dmytro.mapalert.activities;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -18,13 +16,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -32,7 +30,14 @@ import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
+import com.example.dmytro.mapalert.DBUtils.LocationDataSource;
+import com.example.dmytro.mapalert.R;
+import com.example.dmytro.mapalert.activities.views.CustomMapFragment;
+import com.example.dmytro.mapalert.activities.views.PhotoDialog;
+import com.example.dmytro.mapalert.activities.views.RepeatDialog;
+import com.example.dmytro.mapalert.pojo.LocationItem;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -43,6 +48,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
@@ -50,6 +56,7 @@ import java.util.TreeSet;
 public class LocationActivity extends ActionBarActivity implements OnMapReadyCallback, View.OnClickListener, CompoundButton.OnCheckedChangeListener,
         TimePicker.OnTimeChangedListener, View.OnFocusChangeListener {
 
+    private LocationDataSource dataSource;
     private GoogleMap mGoogleMap;
     private EditText mSearchEditText;
     private ImageView mLocPhoto;
@@ -59,9 +66,17 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     private CustomMapFragment mapFragment;
     private ScrollView scrollView;
     private Marker locationMarker;
+    private Bitmap bitmap;
+    private ImageButton mSearchButton;
+
+    //Location object
+    private LocationItem loc;
+    private EditText mTitleEditText, mDescriptionEditText;
     private LatLng coordinates;
+    private boolean mTimeSelected;
     private String mTime;
-    private Button mSearchButton;
+    private byte[] mPhoto;
+    //repeat also
 
     //layouts
     private LinearLayout mHeadLayout, mTimeLayout;
@@ -71,15 +86,16 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     private TreeSet<Integer> selectedItems = new TreeSet<>();
     private boolean checkedDialogItems[] = new boolean[7];
 
-
     private static final int SELECT_FILE = 1111;
     private static final int REQUEST_CAMERA = 9999;
-    private static final int FIRST = 0, SECOND = 1, THIRD = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
+
+        dataSource = LocationDataSource.get(getApplicationContext());
+        dataSource.open();
 
         mHeadLayout = (LinearLayout) findViewById(R.id.headLayout);
         mHeadLayout.setOnClickListener(this);
@@ -95,7 +111,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         scrollView = (ScrollView) findViewById(R.id.scrollView);
         mRepeatTextView = (TextView) findViewById(R.id.repeatTextView);
 
-        mSearchButton = (Button) findViewById(R.id.imageButton);
+        mSearchButton = (ImageButton) findViewById(R.id.searchImageButton);
         mSearchButton.setOnClickListener(this);
 
         mTimeSwitch = (Switch) findViewById(R.id.timeSwitcher);
@@ -110,11 +126,12 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         mapFragment = (CustomMapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
 
+        //Custom Map Fragment , where i handle scroll UP/DOWn problems
         ((CustomMapFragment) getFragmentManager().findFragmentById(R.id.map)).setListener(new CustomMapFragment.OnTouchListener() {
             @Override
             public void onTouch() {
                 scrollView.requestDisallowInterceptTouchEvent(true);
-                scrollView.scrollTo(scrollView.getBottom(), scrollView.getBottom());
+                //scrollView.scrollTo(scrollView.getBottom(), scrollView.getBottom());
             }
         });
         mapFragment.getMapAsync(this);
@@ -143,11 +160,14 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
             googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         }
 
-        /////----------------------------------------------------------------------------------
+        /////-----------------------------On Map click & On Location Change---------------------------
 
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                //hide keyboard
+                hideSoftKeyboard();
+
                 //remove previous marker (on screen should be placed just single marker)
                 if (locationMarker != null) {
                     locationMarker.remove();
@@ -156,8 +176,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                 //set marker
                 locationMarker = googleMap.addMarker(new MarkerOptions().position(latLng));
                 coordinates = latLng;
-                //save coordinates to DB
-                Log.d("Location", "Coordinates" + coordinates);
             }
         });
 
@@ -170,23 +188,27 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
+    public void onClick(View view) {
+        //hide soft keyboard
+        hideSoftKeyboard();
+
+        switch (view.getId()) {
+            //repeat dialog
             case R.id.repeatLayout:
-                createRepeatDialog();
+                new RepeatDialog(this, mRepeatTextView, selectedItems, checkedDialogItems)
+                        .createRepeatDialog();
                 break;
-
+            //photo dialog
             case R.id.locationImageView:
-                createPhotoDialog();
+                new PhotoDialog(this).createPhotoDialog();
                 break;
 
-            case R.id.imageButton:
+            case R.id.searchImageButton:
                 LatLng location = findLocation(mSearchEditText.getText().toString());
                 if (locationMarker != null) {
                     locationMarker.remove();
                     coordinates = null;
                 }
-
                 mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 13));
                 locationMarker = mGoogleMap.addMarker(new MarkerOptions().position(location));
                 coordinates = location;
@@ -200,21 +222,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         }
     }
 
-    //Switcher listener (Show/Hide time layout)
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (isChecked)
-            mTimeLayout.setVisibility(View.VISIBLE);
-        else
-            mTimeLayout.setVisibility(View.GONE);
-        //if unChecked also delete time and repeat from object (Location)
-    }
-
-    //TimePicker listener
-    @Override
-    public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-        mTime = hourOfDay + " : " + minute;
-    }
+    /////---------------------------------- Activity Menu -------------------------------
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -224,7 +232,16 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        //get all fields data and save location to DB
+        switch (item.getItemId()) {
+            case R.id.done:
+                break;
+        }
+
+        if (mTimeSelected) {
+            Toast.makeText(this, "Time" + mTimeSelected, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Time ELSE " + mTimeSelected, Toast.LENGTH_SHORT).show();
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -243,41 +260,43 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         }
         return new LatLng(0, 0);
     }
+    /////------------------------ Switcher listener (Show/Hide time layout) -----------------------------------
 
-    /////----------------------------------Photo Dialog -------------------------------
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        hideSoftKeyboard();
+        this.mTimeSelected = isChecked;
 
-    private void createPhotoDialog() {
-        final CharSequence[] items = {"Take Photo", "Choose from Library",
-                "Cancel"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Add Photo!");
-        builder.setItems(items, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case FIRST:
-                        Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                        File f = new File(Environment.getExternalStorageDirectory(), "temp.jpg");
-                        i.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
-                        startActivityForResult(i, REQUEST_CAMERA);
-                        break;
-                    case SECOND:
-                        Intent intent = new Intent(
-                                Intent.ACTION_PICK,
-                                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                        intent.setType("image/*");
-                        startActivityForResult(
-                                Intent.createChooser(intent, "Select File"),
-                                SELECT_FILE);
-                        break;
-                    case THIRD:
-                        dialog.dismiss();
-                        break;
-                }
-            }
-        });
-        builder.create().show();
+        if (mTimeSelected)
+            mTimeLayout.setVisibility(View.VISIBLE);
+        else
+            mTimeLayout.setVisibility(View.GONE);
     }
+
+    /////------------------------ TimePicker listener -----------------------------------
+
+    @Override
+    public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+        mTime = hourOfDay + " : " + minute;
+    }
+
+    /////---------------------------------Map Search editText focus Listener-----------------------------------------
+    //clear text when search is focused and scroll to bottom
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        if (v.getId() == R.id.searchEditText && hasFocus) {
+            scrollView.scrollTo(scrollView.getBottom(), scrollView.getBottom());
+            mSearchEditText.setText("");
+        }
+    }
+    /////------------------------ Hide KeyBoard -----------------------------------
+
+    public void hideSoftKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), 0);
+    }
+
+    /////----------------------------------Photo Dialog  onActivityResult-------------------------------
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -293,11 +312,17 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                             break;
                         }
                     }
-                    mLocPhoto.setImageBitmap(decodeFile(f.getPath()));
+                    bitmap = decodeFile(f.getPath());      // create Bitmap
+                    mPhoto = bitmapToByteArray(bitmap);    // convert Bitmap to byte array
+                    mLocPhoto.setImageBitmap(bitmap);
                     break;
+
                 case SELECT_FILE:
                     String selectedImagePath = getAbsolutePath(data.getData());
-                    mLocPhoto.setImageBitmap(decodeFile(selectedImagePath));
+
+                    bitmap = decodeFile(selectedImagePath);  // create Bitmap
+                    mPhoto = bitmapToByteArray(bitmap);      // convert Bitmap to byte array
+                    mLocPhoto.setImageBitmap(bitmap);
                     break;
             }
         }
@@ -340,65 +365,24 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         return null;
     }
 
+    public static byte[] bitmapToByteArray(Bitmap bm) {
+        // Create the buffer with the correct size
+        int iBytes = bm.getWidth() * bm.getHeight() * 4;
+        ByteBuffer buffer = ByteBuffer.allocate(iBytes);
 
-    /////----------------------------------Repeat Dialog -------------------------------
-    private void createRepeatDialog() {
-        final CharSequence[] items =
-                {"Every Monday", "Every Tuesday ", "Every Wednesday ", "Every Thursday", "Every Friday", "Every Saturday", "Every Sunday"};
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Repeat");
-        builder.setMultiChoiceItems(items, checkedDialogItems, new DialogInterface.OnMultiChoiceClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                checkedDialogItems[which] = isChecked;
-                if (isChecked) {
-                    selectedItems.add(which);
-                } else if (selectedItems.contains(which)) {
-                    selectedItems.remove(Integer.valueOf(which));
-                }
-            }
-        }).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                mRepeatTextView.setText(convertDays(selectedItems));
-
-            }
-        });
-        //show dialog
-        builder.create().show();
-    }
-
-    private String convertDays(TreeSet<Integer> selectedItems) {
-        final CharSequence[] items =
-                {"Mon ", "Tue ", "Wed ", "Thu ", "Fri ", "Sat ", "Sun "};
-
-        if (selectedItems.size() == 0) return "Never >";
-        else if (selectedItems.size() == 7) return "Every Day >";
-
-        StringBuilder builder = new StringBuilder();
-
-        for (Integer integer : selectedItems) {
-            builder.append(items[integer]);
-        }
-        builder.append(">");
-
-        //+add Weekdays & Weekends when 0,1,2,3,4 selected and 5,6  selected
-        return builder.toString();
+        // Log.e("DBG", buffer.remaining()+""); -- Returns a correct number based on dimensions
+        // Copy to buffer and then into byte array
+        bm.copyPixelsToBuffer(buffer);
+        // Log.e("DBG", buffer.remaining()+""); -- Returns 0
+        return buffer.array();
     }
 
 
-    /////---------------------------------Map Search focus Listener-----------------------------------------
-    //clear text when search is focused and scroll to bottom
     @Override
-    public void onFocusChange(View v, boolean hasFocus) {
-        if (v.getId() == R.id.searchEditText && hasFocus) {
-            scrollView.scrollTo(scrollView.getBottom(), scrollView.getBottom());
-            mSearchEditText.setText("");
-        }
+    protected void onDestroy() {
+        super.onDestroy();
+        dataSource.close();
     }
-    /////--------------------------------------------------------------------------
 }
 
 
