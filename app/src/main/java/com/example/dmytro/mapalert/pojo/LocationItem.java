@@ -1,14 +1,11 @@
 package com.example.dmytro.mapalert.pojo;
 
-import android.graphics.Bitmap;
-
-import com.google.android.gms.maps.model.LatLng;
-
 import java.io.Serializable;
 import java.util.TreeSet;
 
 public class LocationItem implements Serializable {
 
+    static final long serialVersionUID = 5716885753290653044L;
 
     private String mTitle;
     private String mDescription;
@@ -18,26 +15,45 @@ public class LocationItem implements Serializable {
     private TreeSet<Integer> mRepeat;
     private String mTime;
 
-    private LatLng coordinates;
+    private double latitude;
+    private double longitude;
 
 
     public LocationItem() {
     }
 
-    public LocationItem(String mTitle, String mDescription, byte[] mPhoto, LatLng coordinates) {
+    public LocationItem(String mTitle, String mDescription, byte[] mPhoto, double latitude, double longitude) {
         this.mTitle = mTitle;
         this.mDescription = mDescription;
         this.mPhoto = mPhoto;
-        this.coordinates = coordinates;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
-    public LocationItem(String mTitle, String mDescription, byte[] mPhoto, TreeSet<Integer> mRepeat, String mTime, LatLng coordinates) {
+    public LocationItem(String mTitle, String mDescription, byte[] mPhoto, TreeSet<Integer> mRepeat, String mTime, double latitude, double longitude) {
         this.mTitle = mTitle;
         this.mDescription = mDescription;
         this.mPhoto = mPhoto;
         this.mRepeat = mRepeat;
         this.mTime = mTime;
-        this.coordinates = coordinates;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 
     public boolean isTimeSelected() {
@@ -46,14 +62,6 @@ public class LocationItem implements Serializable {
 
     public void setTimeSelected(boolean timeSelected) {
         this.timeSelected = timeSelected;
-    }
-
-    public LatLng getCoordinates() {
-        return coordinates;
-    }
-
-    public void setCoordinates(LatLng coordinates) {
-        this.coordinates = coordinates;
     }
 
     public String getTitle() {

@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
 import com.example.dmytro.mapalert.pojo.LocationItem;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LocationDataSource {
 
@@ -51,6 +53,22 @@ public class LocationDataSource {
         LocationItem loc = cursorToLocation(cursor);
         cursor.close();
         return loc;
+    }
+
+    public List<LocationItem> getAllLocationItems() throws IOException, ClassNotFoundException {
+        List<LocationItem> allLoc = new ArrayList<>();
+
+        Cursor cursor = sdb.query(DBHelper.DATABASE_TABLE,
+                COLUMNS, null, null, null, null, null);
+
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            LocationItem loc = cursorToLocation(cursor);
+            allLoc.add(loc);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return allLoc;
     }
 
     private LocationItem cursorToLocation(Cursor cursor) throws IOException, ClassNotFoundException {

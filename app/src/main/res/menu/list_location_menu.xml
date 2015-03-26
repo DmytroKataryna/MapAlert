@@ -4,9 +4,8 @@
     tools:context=".MainActivity">
 
     <item
-        android:id="@+id/done"
-        android:icon="@drawable/ic_action_done_white"
-        android:title="Done"
+        android:id="@+id/add"
+        android:icon="@drawable/ic_content_add"
+        android:title="Add"
         app:showAsAction="ifRoom" />
-
 </menu>
