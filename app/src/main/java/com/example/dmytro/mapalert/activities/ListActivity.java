@@ -13,6 +13,8 @@ import com.example.dmytro.mapalert.R;
 
 import java.io.IOException;
 
+//here i will place list of locations
+//temporarily, activity have just button that displays the number of  that are saved in DB
 public class ListActivity extends ActionBarActivity {
 
     private LocationDataSource dataSource;
@@ -42,6 +44,7 @@ public class ListActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    //button on click method
     public void getRows(View v) throws IOException, ClassNotFoundException {
         // new DBHelper().onUpgrade();
         Toast.makeText(this, " TXT " + dataSource.getAllLocationItems().size(), Toast.LENGTH_SHORT).show();
