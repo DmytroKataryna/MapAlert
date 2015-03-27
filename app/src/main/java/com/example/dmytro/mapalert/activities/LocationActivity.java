@@ -150,6 +150,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         //save image by default to variable (if user didn't chose any picture , this img will be saved to DB)
         bitmap = BitmapFactory.decodeResource(this.getResources(),
                 R.mipmap.ic_action_house);
+        mPhoto = bitmapToByteArray(bitmap);
     }
 
     @Override
@@ -292,9 +293,9 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                 if (!checkIfAvailableToLogin()) return false;
 
                 if (mTimeSelected) {
-                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, bitmapToByteArray(bitmap), selectedItems, mTime, latitude, longitude);
+                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, mPhoto, selectedItems, mTime, latitude, longitude);
                 } else {
-                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, bitmapToByteArray(bitmap), latitude, longitude);
+                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, mPhoto, latitude, longitude);
                 }
 
                 if (dataBaseId == null) {
