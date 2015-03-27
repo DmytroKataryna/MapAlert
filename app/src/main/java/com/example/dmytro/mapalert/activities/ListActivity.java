@@ -17,6 +17,8 @@ import com.example.dmytro.mapalert.pojo.CursorLocation;
 import java.io.IOException;
 import java.util.List;
 
+//here i will place list of locations
+//temporarily, activity have just button that displays the number of  that are saved in DB
 public class ListActivity extends ActionBarActivity {
 
     private LocationDataSource dataSource;
@@ -63,4 +65,5 @@ public class ListActivity extends ActionBarActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 }

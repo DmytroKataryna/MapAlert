@@ -55,6 +55,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
 
+//location activity (almost done)
+
+//Я старався повиносити частини коду в інші класи , бо цей вийшов дуже занадто громіздкий
+//ще не чистив код (будуть попадатися зміні які не використовують і т.д.)
 public class LocationActivity extends ActionBarActivity implements OnMapReadyCallback, View.OnClickListener, CompoundButton.OnCheckedChangeListener,
         TimePicker.OnTimeChangedListener, View.OnFocusChangeListener {
 
@@ -202,6 +206,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
         /////----------------------------------Move camera to user position or move to selected position--------------------------
 
+
         if (longitude == 0d & longitude == 0d) {
             locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(getUserLocation().latitude, getUserLocation().longitude)));
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
@@ -219,7 +224,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                 //hide keyboard
                 hideSoftKeyboard();
 
-                //remove previous marker (on screen should be placed just single marker)
+                //remove previous marker (on screen should be placed just single(one) marker)
                 if (locationMarker != null) {
                     locationMarker.remove();
                     latitude = 0d;
@@ -255,14 +260,16 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
             case R.id.locationImageView:
                 new PhotoDialog(this).createPhotoDialog();
                 break;
-
+            //search button (placed on MapFragment)
             case R.id.searchImageButton:
                 LatLng location = findLocation(mSearchEditText.getText().toString());
+                //first delete previous marker and clear coordinates
                 if (locationMarker != null) {
                     locationMarker.remove();
                     latitude = 0d;
                     longitude = 0d;
                 }
+                //add marker ,animate map and save coordinates
                 mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 16));
                 locationMarker = mGoogleMap.addMarker(new MarkerOptions().position(location));
                 latitude = location.latitude;
@@ -355,7 +362,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         hideSoftKeyboard();
         this.mTimeSelected = isChecked;
-        //if switcher ON TimePicker and Repeat editText is visible
+        //if switcher ON TimePicker and RepeatEditText is visible
         if (mTimeSelected) {
             mTimeLayout.setVisibility(View.VISIBLE);
             mTime = mTimePicker.getCurrentHour() + " : " + mTimePicker.getCurrentMinute();
@@ -371,17 +378,19 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     }
 
     /////---------------------------------Map Search editText focus Listener & Tittle edit Text Listener---------------------
-    //clear text when search is focused and scroll to bottom
-    //Title field is required , so if text is empty display toast and change background color to red
+
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
         switch (v.getId()) {
+            //clear text when search is focused and scroll to bottom
             case R.id.searchEditText:
                 if (hasFocus) {
                     scrollView.scrollTo(scrollView.getBottom(), scrollView.getBottom());
                     mSearchEditText.setText("");
                 }
                 break;
+
+            //Title field is required , so if text is empty display toast and change background color to red
             case R.id.titleEditText:
                 if (hasFocus) {
                     mTitleEditText.setBackgroundResource(R.drawable.text_view_background);
@@ -502,7 +511,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //dataSource.close();
+        //dataSource.close();  //make bug
     }
 }
 
