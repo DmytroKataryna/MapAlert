@@ -18,6 +18,9 @@ public class RepeatDialog {
     private TreeSet<Integer> selectedItems;
     private boolean checkedDialogItems[];
 
+    public RepeatDialog() {
+    }
+
     public RepeatDialog(Context context, TextView repeatTextView, TreeSet<Integer> selectedItems, boolean checkedDialogItems[]) {
         this.context = context;
         this.mRepeatTextView = repeatTextView;
@@ -53,7 +56,7 @@ public class RepeatDialog {
         builder.create().show();
     }
 
-    private String convertDays(TreeSet<Integer> selectedItems) {
+    public String convertDays(TreeSet<Integer> selectedItems) {
         final CharSequence[] items =
                 {"Mon ", "Tue ", "Wed ", "Thu ", "Fri ", "Sat ", "Sun "};
 

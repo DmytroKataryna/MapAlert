@@ -3,19 +3,25 @@ package com.example.dmytro.mapalert.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
 
 import com.example.dmytro.mapalert.DBUtils.LocationDataSource;
 import com.example.dmytro.mapalert.R;
+import com.example.dmytro.mapalert.activities.views.RecyclerViewAdapter;
+import com.example.dmytro.mapalert.pojo.CursorLocation;
 
 import java.io.IOException;
+import java.util.List;
 
 public class ListActivity extends ActionBarActivity {
 
     private LocationDataSource dataSource;
+    private List<CursorLocation> locationItems;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +30,22 @@ public class ListActivity extends ActionBarActivity {
 
         dataSource = LocationDataSource.get(getApplicationContext());
         dataSource.open();
+
+        //get Data from DB
+        try {
+            locationItems = dataSource.getAllLocationItems();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        recyclerView = (RecyclerView) findViewById(R.id.locationRecycleList);
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, locationItems);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
+
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(itemAnimator);
     }
 
     @Override
@@ -40,10 +62,5 @@ public class ListActivity extends ActionBarActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public void getRows(View v) throws IOException, ClassNotFoundException {
-        // new DBHelper().onUpgrade();
-        Toast.makeText(this, " TXT " + dataSource.getAllLocationItems().size(), Toast.LENGTH_SHORT).show();
     }
 }
