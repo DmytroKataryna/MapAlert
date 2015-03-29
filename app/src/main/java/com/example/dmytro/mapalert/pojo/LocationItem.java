@@ -22,20 +22,22 @@ public class LocationItem implements Serializable {
     public LocationItem() {
     }
 
-    public LocationItem(String mTitle, String mDescription, byte[] mPhoto, double latitude, double longitude) {
+    public LocationItem(String mTitle, String mDescription, boolean timeSelected, byte[] mPhoto, double latitude, double longitude) {
         this.mTitle = mTitle;
         this.mDescription = mDescription;
         this.mPhoto = mPhoto;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.timeSelected = timeSelected;
     }
 
-    public LocationItem(String mTitle, String mDescription, byte[] mPhoto, TreeSet<Integer> mRepeat, String mTime, double latitude, double longitude) {
+    public LocationItem(String mTitle, String mDescription, boolean timeSelected, byte[] mPhoto, TreeSet<Integer> mRepeat, String mTime, double latitude, double longitude) {
         this.mTitle = mTitle;
         this.mDescription = mDescription;
         this.mPhoto = mPhoto;
         this.mRepeat = mRepeat;
         this.mTime = mTime;
+        this.timeSelected = timeSelected;
         this.latitude = latitude;
         this.longitude = longitude;
     }

@@ -23,14 +23,15 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:focusable="true"
-                android:focusableInTouchMode="true">
+                >
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Title : " />
+                    android:text="Title : "
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"/>
 
                 <EditText
                     android:layout_width="match_parent"
@@ -152,9 +153,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/timePicker"
-                    android:timePickerMode="spinner"
-                    android:layout_gravity="center_horizontal" />
 
+                    android:layout_gravity="center_horizontal"
+                    android:timePickerMode="spinner" />
+ 
             </LinearLayout>
         </LinearLayout>
 

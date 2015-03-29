@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationItem;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class LocationDataSource {
         dbHelper.close();
     }
 
-    public LocationItem createLocation(LocationItem locationItem) throws IOException, ClassNotFoundException {
+    public CursorLocation createLocation(LocationItem locationItem) throws IOException, ClassNotFoundException {
 
         ContentValues values = new ContentValues();
         values.put(DBHelper.LOCATION_COLUMN, Serializer.serialize(locationItem));
@@ -50,28 +51,40 @@ public class LocationDataSource {
                 COLUMNS, DBHelper.ID_COLUMN + " = " + insertId, null,
                 null, null, null);
         cursor.moveToFirst();
-        LocationItem loc = cursorToLocation(cursor);
+        CursorLocation item = cursorToLocation(cursor);
         cursor.close();
-        return loc;
+        return item;
     }
 
-    public List<LocationItem> getAllLocationItems() throws IOException, ClassNotFoundException {
-        List<LocationItem> allLoc = new ArrayList<>();
+    public void updateLocation(int id, LocationItem locationItem) throws IOException {
+
+        ContentValues values = new ContentValues();
+        values.put(DBHelper.LOCATION_COLUMN, Serializer.serialize(locationItem));
+
+        sdb.update(DBHelper.DATABASE_TABLE, values, DBHelper.ID_COLUMN + "=" + id, null);
+    }
+
+    public void deleteLocation(Integer id) {
+        sdb.delete(DBHelper.DATABASE_TABLE, DBHelper.ID_COLUMN + " = ?", new String[]{String.valueOf(id)});
+    }
+
+    public List<CursorLocation> getAllLocationItems() throws IOException, ClassNotFoundException {
+        List<CursorLocation> allLoc = new ArrayList<>();
 
         Cursor cursor = sdb.query(DBHelper.DATABASE_TABLE,
                 COLUMNS, null, null, null, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            LocationItem loc = cursorToLocation(cursor);
-            allLoc.add(loc);
+            CursorLocation item = cursorToLocation(cursor);
+            allLoc.add(item);
             cursor.moveToNext();
         }
         cursor.close();
         return allLoc;
     }
 
-    private LocationItem cursorToLocation(Cursor cursor) throws IOException, ClassNotFoundException {
-        return (LocationItem) Serializer.deserialize(cursor.getBlob(1));
+    private CursorLocation cursorToLocation(Cursor cursor) throws IOException, ClassNotFoundException {
+        return new CursorLocation(cursor.getInt(0), (LocationItem) Serializer.deserialize(cursor.getBlob(1)));
     }
 }

@@ -37,7 +37,9 @@ import com.example.dmytro.mapalert.DBUtils.LocationDataSource;
 import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.views.CustomMapFragment;
 import com.example.dmytro.mapalert.activities.views.PhotoDialog;
+import com.example.dmytro.mapalert.activities.views.RecyclerViewAdapter;
 import com.example.dmytro.mapalert.activities.views.RepeatDialog;
+import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationItem;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -59,6 +61,8 @@ import java.util.TreeSet;
 //ще не чистив код (будуть попадатися зміні які не використовують і т.д.)
 public class LocationActivity extends ActionBarActivity implements OnMapReadyCallback, View.OnClickListener, CompoundButton.OnCheckedChangeListener,
         TimePicker.OnTimeChangedListener, View.OnFocusChangeListener {
+
+    private static Integer dataBaseId;
 
     //Image intent constants
     private static final int SELECT_FILE = 1111;
@@ -148,20 +152,70 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         mapFragment.getMapAsync(this);
 
         //save image by default to variable (if user didn't chose any picture , this img will be saved to DB)
-        mPhoto = bitmapToByteArray(BitmapFactory.decodeResource(this.getResources(),
-                R.mipmap.ic_action_house));
+        bitmap = BitmapFactory.decodeResource(this.getResources(),
+                R.mipmap.ic_action_house);
+        mPhoto = bitmapToByteArray(bitmap);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //start edit mode (restore data )
+        if (getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false)) {
+            restoreData();
+        }
+    }
+
+    private void restoreData() {
+        loc = ((CursorLocation) getIntent().getSerializableExtra(RecyclerViewAdapter.ITEM_KEY)).getItem();
+        dataBaseId = ((CursorLocation) getIntent().getSerializableExtra(RecyclerViewAdapter.ITEM_KEY)).getId();
+        mTitleEditText.setText(loc.getTitle());
+        mDescriptionEditText.setText(loc.getDescription());
+        bitmap = byteArrayToBitmap(loc.getPhoto());
+
+        if (loc.isTimeSelected()) {
+            mTimeSwitch.setChecked(true);
+            //parse Time string to Hour  & Minute
+            String time[] = loc.getTime().split(" : ");
+            mTimePicker.setCurrentHour(Integer.valueOf(time[0]));
+            mTimePicker.setCurrentMinute(Integer.valueOf(time[1]));
+
+            selectedItems = loc.getRepeat();
+            for (Integer i : selectedItems) {
+                checkedDialogItems[i] = true;
+            }
+            mRepeatTextView.setText(new RepeatDialog().convertDays(selectedItems));
+        }
+        latitude = loc.getLatitude();
+        longitude = loc.getLongitude();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mLocPhoto.setImageBitmap(bitmap);
     }
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         this.mGoogleMap = googleMap;
+
         googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
         googleMap.setMyLocationEnabled(true);
 
-        /////----------------------------------Move camera to user position--------------------------
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                new LatLng(getUserLocation().getLatitude(), getUserLocation().getLongitude()), 16));
+        /////----------------------------------Move camera to user position or move to selected position--------------------------
 
+
+        if (longitude == 0d & longitude == 0d) {
+            locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(getUserLocation().latitude, getUserLocation().longitude)));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(getUserLocation().latitude, getUserLocation().longitude), 15));
+        } else {
+            locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(latitude, longitude), 15));
+        }
         /////-----------------------------On Map click & On Location Change---------------------------
 
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -245,17 +299,28 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
                 if (!checkIfAvailableToLogin()) return false;
 
-                try { //depends on time switcher selection , it is saved different object
-                    if (mTimeSelected) {
-                        loc = dataSource.createLocation(new LocationItem(mTitle, mDescription, mPhoto, selectedItems, mTime, latitude, longitude));
-                    } else {
-                        loc = dataSource.createLocation(new LocationItem(mTitle, mDescription, mPhoto, latitude, longitude));
-                    }
-                    startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
+                if (mTimeSelected) {
+                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, mPhoto, selectedItems, mTime, latitude, longitude);
+                } else {
+                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, mPhoto, latitude, longitude);
                 }
-                return true;
+
+                if (dataBaseId == null) {
+                    try { //depends on time switcher selection , it is saved different object
+                        dataSource.createLocation(loc);
+                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                    } catch (IOException | ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    return true;
+                } else {
+                    try {
+                        dataSource.updateLocation(dataBaseId, loc);
+                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -289,7 +354,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         }
         //if no addresses found move to user current location
         Toast.makeText(this, "No address found", Toast.LENGTH_SHORT).show();
-        return new LatLng(getUserLocation().getLatitude(), getUserLocation().getLongitude());
+        return new LatLng(getUserLocation().latitude, getUserLocation().longitude);
     }
     /////------------------------ Switcher listener (Show/Hide time layout) ----------------------------------------------
 
@@ -367,7 +432,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                         }
                     }
                     bitmap = decodeFile(f.getPath());      // create Bitmap
-                    mPhoto = bitmapToByteArray(bitmap);    // convert Bitmap to byte array
                     mLocPhoto.setImageBitmap(bitmap);
                     break;
 
@@ -375,7 +439,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                     String selectedImagePath = getAbsolutePath(data.getData());
 
                     bitmap = decodeFile(selectedImagePath);  // create Bitmap
-                    mPhoto = bitmapToByteArray(bitmap);      // convert Bitmap to byte array
                     mLocPhoto.setImageBitmap(bitmap);
                     break;
             }
@@ -432,15 +495,16 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
     /////--------------------------------Get User Location--------------------------------
 
-    public Location getUserLocation() {
+    public LatLng getUserLocation() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Criteria criteria = new Criteria();
 
         final Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
         if (location != null) {
-            return location;
+            return new LatLng(location.getLatitude(), location.getLongitude());
         }
-        return null;
+        //if location null move camera to London
+        return new LatLng(51.50722, -0.12750);
     }
 
     /////--------------------------------------------------------------------------------------
