@@ -1,84 +1,83 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="100dp">
 
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="99dp"
-        android:layout_marginLeft="4dp"
-        android:id="@+id/itemLayout">
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="0dp"
-            android:layout_weight="4"
-            android:layout_height="fill_parent"
-            android:layout_marginLeft="5dp"
-            android:layout_marginTop="6dp">
-
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:text="TITLE : "
-                android:id="@+id/titleItemTextView"
-                android:textSize="22sp"
-                android:textColor="#33b5e5" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="DESCRIPTION : "
-                android:id="@+id/descItemTextView" />
-        </LinearLayout>
-
-        <com.makeramen.roundedimageview.RoundedImageView xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:layout_weight="2"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:id="@+id/locPhotoView"
-            android:src="@mipmap/ic_action_house"
-            android:scaleType="fitCenter"
-            android:layout_gravity="end"
-
-            android:layout_marginTop="4dp"
-            android:paddingTop="4dp"
-            app:riv_corner_radius="15dip"
-            app:riv_border_width="2dip"
-            app:riv_border_color="#33b5e5"
-            app:riv_mutate_background="true" />
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5">
-
-            <ImageButton
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:id="@+id/editItemButton"
-                android:background="@drawable/ic_image_edit_blue"
-                android:padding="3dp"
-                android:layout_marginTop="2dp" />
-
-            <ImageButton
-                android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:id="@+id/deleteItemButton"
-                android:background="@drawable/ic_action_trash" />
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <FrameLayout
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_gravity="center"
+        android:id="@+id/card_view"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#33b5e5" />
+        android:layout_height="105dp"
+        card_view:cardCornerRadius="4dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="104dp"
+            android:layout_marginLeft="4dp"
+            android:id="@+id/itemLayout">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_weight="4"
+                android:layout_height="fill_parent"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="6dp">
 
 
-</LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:text="TITLE : "
+                    android:id="@+id/titleItemTextView"
+                    android:textSize="22sp"
+                    android:textColor="#33b5e5" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="DESCRIPTION : "
+                    android:id="@+id/descItemTextView" />
+            </LinearLayout>
+
+            <com.makeramen.roundedimageview.RoundedImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_weight="2"
+                android:layout_width="0dp"
+                android:layout_height="90dp"
+                android:id="@+id/locPhotoView"
+                android:src="@mipmap/ic_action_house"
+                android:scaleType="fitCenter"
+                android:layout_gravity="end"
+
+                android:paddingTop="4dp"
+                app:riv_corner_radius="15dip"
+                app:riv_border_width="2dip"
+                app:riv_border_color="#33b5e5"
+                app:riv_mutate_background="true" />
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5">
+
+                <ImageButton
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:id="@+id/editItemButton"
+                    android:background="@drawable/ic_image_edit_blue"
+                    android:padding="3dp" />
+
+                <ImageButton
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:id="@+id/deleteItemButton"
+                    android:background="@drawable/ic_action_trash" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </android.support.v7.widget.CardView>

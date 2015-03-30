@@ -2,8 +2,6 @@ package com.example.dmytro.mapalert.activities.views;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +16,9 @@ import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.LocationActivity;
 import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationItem;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
@@ -49,10 +49,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         viewHolder.title.setText(trimText(locationItem.getTitle()));
         viewHolder.description.setText(trimText(locationItem.getDescription()));
-        viewHolder.photo.setImageBitmap(byteArrayToBitmap(locationItem.getPhoto()));
         viewHolder.editButtonListener.setLocation(items.get(i));
         viewHolder.deleteButtonListener.setLocation(items.get(i));
         viewHolder.layoutListener.setLocation(items.get(i));
+
+        Picasso.with(activity).load(new File(locationItem.getImagePath()))
+                .placeholder(R.mipmap.ic_action_house)
+                .into(viewHolder.photo);
     }
 
     @Override
@@ -143,13 +146,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public void setLocation(CursorLocation location) {
             this.location = location;
         }
-    }
-
-
-    //------------------------------      -------------------------------------------------------
-    //convert  byte array to Bitmap
-    public static Bitmap byteArrayToBitmap(byte[] array) {
-        return BitmapFactory.decodeByteArray(array, 0, array.length);
     }
 
     //convert text (delete spaces and line separators)

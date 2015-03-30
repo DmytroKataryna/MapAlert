@@ -9,7 +9,7 @@ public class LocationItem implements Serializable {
 
     private String mTitle;
     private String mDescription;
-    private byte[] mPhoto;
+    private String mImagePath;
 
     private boolean timeSelected;
     private TreeSet<Integer> mRepeat;
@@ -22,19 +22,19 @@ public class LocationItem implements Serializable {
     public LocationItem() {
     }
 
-    public LocationItem(String mTitle, String mDescription, boolean timeSelected, byte[] mPhoto, double latitude, double longitude) {
+    public LocationItem(String mTitle, String mDescription, boolean timeSelected, String imagePath, double latitude, double longitude) {
         this.mTitle = mTitle;
         this.mDescription = mDescription;
-        this.mPhoto = mPhoto;
+        this.mImagePath = imagePath;
         this.latitude = latitude;
         this.longitude = longitude;
         this.timeSelected = timeSelected;
     }
 
-    public LocationItem(String mTitle, String mDescription, boolean timeSelected, byte[] mPhoto, TreeSet<Integer> mRepeat, String mTime, double latitude, double longitude) {
+    public LocationItem(String mTitle, String mDescription, boolean timeSelected, String imagePath, TreeSet<Integer> mRepeat, String mTime, double latitude, double longitude) {
         this.mTitle = mTitle;
         this.mDescription = mDescription;
-        this.mPhoto = mPhoto;
+        this.mImagePath = imagePath;
         this.mRepeat = mRepeat;
         this.mTime = mTime;
         this.timeSelected = timeSelected;
@@ -90,12 +90,12 @@ public class LocationItem implements Serializable {
         this.mTime = mTime;
     }
 
-    public byte[] getPhoto() {
-        return mPhoto;
+    public String getImagePath() {
+        return mImagePath;
     }
 
-    public void setPhoto(byte[] mPhoto) {
-        this.mPhoto = mPhoto;
+    public void setImagePath(String mImagePath) {
+        this.mImagePath = mImagePath;
     }
 
     public TreeSet<Integer> getRepeat() {
