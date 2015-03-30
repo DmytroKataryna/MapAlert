@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +34,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.dmytro.mapalert.DBUtils.ImageUtil;
 import com.example.dmytro.mapalert.DBUtils.LocationDataSource;
 import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.views.CustomMapFragment;
@@ -47,8 +49,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.squareup.picasso.Picasso;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -71,15 +73,19 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     private LocationDataSource dataSource;
     private GoogleMap mGoogleMap;
     private EditText mSearchEditText, mTitleEditText, mDescriptionEditText;
-    private ImageView mLocPhoto;
     private TimePicker mTimePicker;
     private TextView mRepeatTextView;
     private Switch mTimeSwitch;
     private CustomMapFragment mapFragment;
     private ScrollView scrollView;
     private Marker locationMarker;
-    private Bitmap bitmap;
     private ImageButton mSearchButton;
+    //Image
+    private ImageView mLocPhoto;
+    private Bitmap bitmap;
+    private File imagePathFile;
+    private String imagePath;
+
 
     //Location object
     private LocationItem loc;
@@ -88,7 +94,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     private double longitude;
     private boolean mTimeSelected;
     private String mTime;
-    private byte[] mPhoto;
 
     //layouts
     private LinearLayout mHeadLayout, mTimeLayout;
@@ -151,10 +156,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         });
         mapFragment.getMapAsync(this);
 
-        //save image by default to variable (if user didn't chose any picture , this img will be saved to DB)
-        bitmap = BitmapFactory.decodeResource(this.getResources(),
-                R.mipmap.ic_action_house);
-        mPhoto = bitmapToByteArray(bitmap);
     }
 
     @Override
@@ -166,12 +167,17 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         }
     }
 
+    //------------------------------------------------- RESTORE DATA (location object from DB )---------------------
     private void restoreData() {
         loc = ((CursorLocation) getIntent().getSerializableExtra(RecyclerViewAdapter.ITEM_KEY)).getItem();
         dataBaseId = ((CursorLocation) getIntent().getSerializableExtra(RecyclerViewAdapter.ITEM_KEY)).getId();
         mTitleEditText.setText(loc.getTitle());
         mDescriptionEditText.setText(loc.getDescription());
-        bitmap = byteArrayToBitmap(loc.getPhoto());
+        imagePath = loc.getImagePath();  // get image path from db
+
+        Picasso.with(getApplicationContext()).load(new File(imagePath)) 
+                .placeholder(R.mipmap.ic_action_house)
+                .into(mLocPhoto);
 
         if (loc.isTimeSelected()) {
             mTimeSwitch.setChecked(true);
@@ -190,13 +196,74 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         longitude = loc.getLongitude();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    /////----------------------------------Photo Dialog  onActivityResult------------------------------------------
 
-        mLocPhoto.setImageBitmap(bitmap);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case REQUEST_CAMERA:
+                    //f.getPath() завжди незміний / тому можна захаркодити /storage/emulated/0/temp.jpg
+                    File f = new File(Environment.getExternalStorageDirectory()
+                            .toString());
+                    for (File temp : f.listFiles()) {
+                        if (temp.getName().equals("temp.jpg")) {
+                            f = temp;
+                            break;
+                        }
+                    }
+                    //delete previous image
+                    if (imagePathFile != null) {
+                        imagePathFile.delete();
+                    }
+                    bitmap = ImageUtil.decodeFile(f.getPath());      // create Bitmap
+                    imagePathFile = ImageUtil.saveToInternalStorage(getApplicationContext(), bitmap);
+
+                    mLocPhoto.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mLocPhoto.setImageBitmap(bitmap);
+                        }
+                    });
+
+//                    Picasso picasso = Picasso.with(getApplicationContext());
+//                    picasso.invalidate(imagePathFile);
+//                    picasso.load(imagePathFile).placeholder(R.mipmap.ic_action_house)
+//                            .into(mLocPhoto);
+
+                    break;
+
+                case SELECT_FILE:
+                    String selectedImagePath = ImageUtil.getAbsolutePath(this, data.getData());
+
+                    //delete previous image
+                    if (imagePathFile != null) {
+                        imagePathFile.delete();
+                    }
+
+                    bitmap = ImageUtil.decodeFile(selectedImagePath);  // create Bitmap
+                    imagePathFile = ImageUtil.saveToInternalStorage(getApplicationContext(), bitmap);
+
+                    //mLocPhoto.setImageBitmap(bitmap);
+
+                    mLocPhoto.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mLocPhoto.setImageBitmap(bitmap);
+                        }
+                    });
+
+//                    Picasso.with(getApplicationContext()).load(imagePathFile)
+//                            .placeholder(R.mipmap.ic_action_house)
+//                            .into(mLocPhoto);
+
+                    break;
+            }
+        }
     }
 
+    //  --------------------------------- Google Maps -----------------------------------------
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         this.mGoogleMap = googleMap;
@@ -204,8 +271,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
         googleMap.setMyLocationEnabled(true);
 
-        /////----------------------------------Move camera to user position or move to selected position--------------------------
-
+        ///////////Move camera to user position or move to selected position
 
         if (longitude == 0d & longitude == 0d) {
             locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(getUserLocation().latitude, getUserLocation().longitude)));
@@ -216,7 +282,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(latitude, longitude), 15));
         }
-        /////-----------------------------On Map click & On Location Change---------------------------
+        ////////// On Map click & On Location Change
 
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -299,10 +365,13 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
                 if (!checkIfAvailableToLogin()) return false;
 
+                if (imagePathFile == null)
+                    imagePathFile = new File("drawable://" + R.mipmap.ic_action_house);
+
                 if (mTimeSelected) {
-                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, mPhoto, selectedItems, mTime, latitude, longitude);
+                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, imagePathFile.getPath(), selectedItems, mTime, latitude, longitude);
                 } else {
-                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, mPhoto, latitude, longitude);
+                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, imagePathFile.getPath(), latitude, longitude);
                 }
 
                 if (dataBaseId == null) {
@@ -361,13 +430,16 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         hideSoftKeyboard();
-        this.mTimeSelected = isChecked;
         //if switcher ON TimePicker and RepeatEditText is visible
-        if (mTimeSelected) {
+        if (mTimeSwitch.isChecked()) {
+            mTimeSelected = true;
             mTimeLayout.setVisibility(View.VISIBLE);
             mTime = mTimePicker.getCurrentHour() + " : " + mTimePicker.getCurrentMinute();
-        } else
+        } else {
+            mTimeSelected = false;
             mTimeLayout.setVisibility(View.GONE);
+        }
+
     }
 
     /////------------------------ TimePicker listener ---------------------------------------------------------------
@@ -415,83 +487,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         imm.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), 0);
     }
 
-    /////----------------------------------Photo Dialog  onActivityResult------------------------------------------
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
-            switch (requestCode) {
-                case REQUEST_CAMERA:
-                    File f = new File(Environment.getExternalStorageDirectory()
-                            .toString());
-                    for (File temp : f.listFiles()) {
-                        if (temp.getName().equals("temp.jpg")) {
-                            f = temp;
-                            break;
-                        }
-                    }
-                    bitmap = decodeFile(f.getPath());      // create Bitmap
-                    mLocPhoto.setImageBitmap(bitmap);
-                    break;
-
-                case SELECT_FILE:
-                    String selectedImagePath = getAbsolutePath(data.getData());
-
-                    bitmap = decodeFile(selectedImagePath);  // create Bitmap
-                    mLocPhoto.setImageBitmap(bitmap);
-                    break;
-            }
-        }
-    }
-
-    public String getAbsolutePath(Uri uri) {
-        String[] projection = {MediaStore.MediaColumns.DATA};
-        @SuppressWarnings("deprecation")
-        Cursor cursor = managedQuery(uri, projection, null, null, null);
-        if (cursor != null) {
-            int column_index = cursor
-                    .getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } else
-            return null;
-    }
-
-    public Bitmap decodeFile(String path) {
-        try {
-            // Decode image size
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(path, o);
-            // The new size we want to scale to
-            final int REQUIRED_SIZE = 70;
-            // Find the correct scale value. It should be the power of 2
-            int scale = 1;
-            while (o.outWidth / scale / 2 >= REQUIRED_SIZE
-                    && o.outHeight / scale / 2 >= REQUIRED_SIZE)
-                scale *= 2;
-            // Decode with inSampleSize
-            BitmapFactory.Options o2 = new BitmapFactory.Options();
-            o2.inSampleSize = scale;
-            return BitmapFactory.decodeFile(path, o2);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static byte[] bitmapToByteArray(Bitmap bm) {
-        //convert Bitmap to byte array
-        ByteArrayOutputStream blob = new ByteArrayOutputStream();
-        bm.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, blob);
-        return blob.toByteArray();
-    }
-
-    public static Bitmap byteArrayToBitmap(byte[] array) {
-        //convert  byte array to Bitmap
-        return BitmapFactory.decodeByteArray(array, 0, array.length);
-    }
 
     /////--------------------------------Get User Location--------------------------------
 
