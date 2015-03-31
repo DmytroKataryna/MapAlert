@@ -5,9 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="105dp"
     card_view:cardCornerRadius="4dp"
-    android:layout_marginTop="1dp"
-    android:layout_marginLeft="2dp"
-    android:layout_marginRight="2dp">
+    android:layout_marginTop="5dp"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp">
 
     <LinearLayout
         android:orientation="horizontal"

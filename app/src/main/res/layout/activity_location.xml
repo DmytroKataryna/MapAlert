@@ -23,9 +23,9 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 card_view:cardCornerRadius="4dp"
-                android:layout_marginTop="3dp"
-                android:layout_marginRight="3dp"
-                android:layout_marginLeft="3dp">
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginLeft="5dp">
 
 
                 <LinearLayout
@@ -79,8 +79,9 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 card_view:cardCornerRadius="4dp"
-                android:layout_marginRight="3dp"
-                android:layout_marginLeft="3dp">
+                android:layout_marginRight="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp">
 
                 <LinearLayout
                     android:orientation="vertical"
@@ -131,7 +132,7 @@
                             android:textAppearance="?android:attr/textAppearanceMedium"
                             android:text="Set Time : " />
 
-                        <Switch
+                        <android.support.v7.widget.SwitchCompat
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:id="@+id/timeSwitcher"
@@ -156,10 +157,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     card_view:cardCornerRadius="4dp"
-                    android:layout_marginTop="3dp"
-                    android:layout_marginBottom="2dp"
-                    android:layout_marginLeft="3dp"
-                    android:layout_marginRight="2dp">
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp">
 
                     <RelativeLayout
                         android:orientation="horizontal"
@@ -213,10 +213,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 card_view:cardCornerRadius="4dp"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="2dp"
-                android:layout_marginLeft="3dp"
-                android:layout_marginRight="2dp">
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="3dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp">
 
                 <FrameLayout
                     android:layout_width="fill_parent"

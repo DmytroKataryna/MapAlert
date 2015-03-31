@@ -12,6 +12,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SwitchCompat;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,7 +25,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -70,7 +70,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     private EditText mSearchEditText, mTitleEditText, mDescriptionEditText;
     private TimePicker mTimePicker;
     private TextView mRepeatTextView;
-    private Switch mTimeSwitch;
+    private SwitchCompat mTimeSwitch;
     private CustomMapFragment mapFragment;
     private ScrollView scrollView;
     private Marker locationMarker;
@@ -80,7 +80,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     private Bitmap bitmap;
     private File imagePathFile;
     private String imagePath;
-
 
     //Location object
     private LocationItem loc;
@@ -129,7 +128,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         mSearchButton = (ImageButton) findViewById(R.id.searchImageButton);
         mSearchButton.setOnClickListener(this);
 
-        mTimeSwitch = (Switch) findViewById(R.id.timeSwitcher);
+        mTimeSwitch = (SwitchCompat) findViewById(R.id.timeSwitcher);
         mTimeSwitch.setOnCheckedChangeListener(this);
 
         mTimePicker = (TimePicker) findViewById(R.id.timePicker);
