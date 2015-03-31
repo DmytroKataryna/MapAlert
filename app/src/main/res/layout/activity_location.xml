@@ -208,7 +208,7 @@
                     android:layout_height="45dp"
                     android:id="@+id/searchEditText"
                     android:inputType="textNoSuggestions"
-                    android:text="Search ..."
+                    android:hint="Search ..."
                     android:background="@drawable/text_view_background"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginRight="25dp" />

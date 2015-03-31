@@ -74,7 +74,6 @@ public class ImageUtil {
             return path;
         } else
             return null;
-
     }
 
 //

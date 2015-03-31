@@ -447,7 +447,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
             case R.id.searchEditText:
                 if (hasFocus) {
                     scrollView.scrollTo(scrollView.getBottom(), scrollView.getBottom());
-                    mSearchEditText.setText("");
                 }
                 break;
 
