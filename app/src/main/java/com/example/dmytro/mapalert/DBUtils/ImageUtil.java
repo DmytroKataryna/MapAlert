@@ -9,12 +9,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.widget.ImageView;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 public class ImageUtil {
@@ -51,7 +47,7 @@ public class ImageUtil {
         // Create imageDir
         int rand = (int) (Math.random() * 100);
         File myPath = new File(directory, rand + "image.jpg");
-        FileOutputStream fos = null;
+        FileOutputStream fos;
         try {
             fos = new FileOutputStream(myPath);
             // Use the compress method on the BitMap object to write image to the OutputStream
@@ -65,16 +61,20 @@ public class ImageUtil {
 
 
     public static String getAbsolutePath(Activity activity, Uri uri) {
-        String[] projection = {MediaStore.MediaColumns.DATA};
-        @SuppressWarnings("deprecation")
-        Cursor cursor = activity.managedQuery(uri, projection, null, null, null);
+        String[] filePathColumn = {MediaStore.Images.Media.DATA};
+        // Get the cursor
+        Cursor cursor = activity.getContentResolver().query(uri,
+                filePathColumn, null, null, null);
+
         if (cursor != null) {
-            int column_index = cursor
-                    .getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
             cursor.moveToFirst();
-            return cursor.getString(column_index);
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            String path = cursor.getString(columnIndex);
+            cursor.close();
+            return path;
         } else
             return null;
+
     }
 
 //
