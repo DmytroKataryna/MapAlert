@@ -3,20 +3,15 @@ package com.example.dmytro.mapalert.activities;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -156,15 +151,10 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         });
         mapFragment.getMapAsync(this);
 
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
         //start edit mode (restore data )
-        if (getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false)) {
+        if (getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false))
             restoreData();
-        }
+
     }
 
     //------------------------------------------------- RESTORE DATA (location object from DB )---------------------
@@ -175,7 +165,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         mDescriptionEditText.setText(loc.getDescription());
         imagePath = loc.getImagePath();  // get image path from db
 
-        Picasso.with(getApplicationContext()).load(new File(imagePath)) 
+        Picasso.with(getApplicationContext()).load(new File(imagePath))
                 .placeholder(R.mipmap.ic_action_house)
                 .into(mLocPhoto);
 
@@ -214,8 +204,8 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                         }
                     }
                     //delete previous image
-                    if (imagePathFile != null) {
-                        imagePathFile.delete();
+                    if (imagePath != null) {
+                        new File(imagePath).delete();
                     }
                     bitmap = ImageUtil.decodeFile(f.getPath());      // create Bitmap
                     imagePathFile = ImageUtil.saveToInternalStorage(getApplicationContext(), bitmap);
@@ -226,6 +216,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                             mLocPhoto.setImageBitmap(bitmap);
                         }
                     });
+                    imagePath = imagePathFile.getPath();
 
 //                    Picasso picasso = Picasso.with(getApplicationContext());
 //                    picasso.invalidate(imagePathFile);
@@ -238,8 +229,8 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                     String selectedImagePath = ImageUtil.getAbsolutePath(this, data.getData());
 
                     //delete previous image
-                    if (imagePathFile != null) {
-                        imagePathFile.delete();
+                    if (imagePath != null) {
+                        new File(imagePath).delete();
                     }
 
                     bitmap = ImageUtil.decodeFile(selectedImagePath);  // create Bitmap
@@ -253,6 +244,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                             mLocPhoto.setImageBitmap(bitmap);
                         }
                     });
+                    imagePath = imagePathFile.getPath();
 
 //                    Picasso.with(getApplicationContext()).load(imagePathFile)
 //                            .placeholder(R.mipmap.ic_action_house)
@@ -365,31 +357,28 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
                 if (!checkIfAvailableToLogin()) return false;
 
-                if (imagePathFile == null)
-                    imagePathFile = new File("drawable://" + R.mipmap.ic_action_house);
+                if (imagePath == null) //if nothing selected , save default img
+                    imagePath = "drawable://" + R.mipmap.ic_action_house;
 
-                if (mTimeSelected) {
-                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, imagePathFile.getPath(), selectedItems, mTime, latitude, longitude);
+                if (mTimeSelected) { //depends on time switcher selection , it is saved different object
+                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);
                 } else {
-                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, imagePathFile.getPath(), latitude, longitude);
+                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, imagePath, latitude, longitude);
                 }
 
-                if (dataBaseId == null) {
-                    try { //depends on time switcher selection , it is saved different object
+
+                try { //create or update location
+                    if (!getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false)) {
                         dataSource.createLocation(loc);
                         startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                    } catch (IOException | ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    return true;
-                } else {
-                    try {
+                    } else {
                         dataSource.updateLocation(dataBaseId, loc);
                         startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
                 }
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

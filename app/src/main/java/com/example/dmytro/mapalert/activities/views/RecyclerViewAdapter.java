@@ -64,8 +64,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     private void delete(CursorLocation item) {
-        //delete from DB
-        dataSource.deleteLocation(item.getId());
+        //delete location from DB and also image from internal storage
+        dataSource.deleteLocation(item.getId(), item.getItem().getImagePath());
 
         int position = items.indexOf(item);
         items.remove(position);
