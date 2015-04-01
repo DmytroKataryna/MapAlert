@@ -1,21 +1,18 @@
 package com.example.dmytro.mapalert.activities.views;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.example.dmytro.mapalert.DBUtils.LocationDataSource;
+import com.example.dmytro.mapalert.utils.LocationDataSource;
 import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.LocationActivity;
 import com.example.dmytro.mapalert.pojo.CursorLocation;

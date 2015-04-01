@@ -42,5 +42,9 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
 
+        <service
+            android:name="com.example.dmytro.mapalert.geofencing.GeofenceTransitionsIntentService"
+            android:exported="false" />
+
     </application>
 </manifest>

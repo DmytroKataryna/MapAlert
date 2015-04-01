@@ -1,4 +1,4 @@
-package com.example.dmytro.mapalert.DBUtils;
+package com.example.dmytro.mapalert.utils;
 
 
 import android.app.Activity;
