@@ -37,7 +37,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="DESCRIPTION : "
-                android:id="@+id/descItemTextView" />
+                android:id="@+id/descItemTextView"
+                android:lines="3" />
         </LinearLayout>
 
         <com.makeramen.roundedimageview.RoundedImageView xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -72,7 +73,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:id="@+id/deleteItemButton"
-                android:background="@drawable/ic_action_trash" />
+                android:background="@drawable/ic_action_delete"
+                android:layout_marginTop="3dp"
+                android:layout_marginRight="1dp" />
         </LinearLayout>
 
     </LinearLayout>
