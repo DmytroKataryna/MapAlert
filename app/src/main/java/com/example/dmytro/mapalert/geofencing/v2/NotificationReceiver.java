@@ -9,82 +9,30 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.text.TextUtils;
-import android.util.Log;
 
 import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.ListActivity;
-import com.example.dmytro.mapalert.geofencing.GeofenceErrorMessages;
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingEvent;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class NotificationReceiver extends BroadcastReceiver {
 
     protected static final String TAG = "geofence-broadcast";
-    private Context context;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        this.context = context;
-
-        GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
-
-        if (geofencingEvent.hasError()) {
-            String errorMessage = GeofenceErrorMessages.getErrorString(context, geofencingEvent.getErrorCode());
-            Log.e(TAG, errorMessage);
-            return;
-        }
-
-        // Get the transition type.
-        int geofenceTransition = geofencingEvent.getGeofenceTransition();
-
-        // Test that the reported transition was of interest.
-        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
-                geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-
-            // Get the geofences that were triggered. A single event can trigger multiple geofences
-            List triggeringGeofences = geofencingEvent.getTriggeringGeofences();
-
-            // Get the transition details as a String.
-            String geofenceTransitionDetails = getGeofenceTransitionDetails(context, geofenceTransition, triggeringGeofences);
-
-            // Send notification and log the transition details.
-            sendNotification(geofenceTransitionDetails);
-            Log.i(TAG, geofenceTransitionDetails);
-        } else {
-            //Log the error.
-            Log.e(TAG, context.getString(R.string.geofence_transition_invalid_type,
-                    geofenceTransition));
-        }
+        sendNotification(context, "LEAVE AREA");
     }
 
-    private String getGeofenceTransitionDetails(Context context, int geofenceTransition, List<Geofence> triggeringGeofences) {
-
-        String geofenceTransitionString = getTransitionString(geofenceTransition);
-
-        // Get the Ids of each geofence that was triggered.
-        ArrayList triggeringGeofencesIdsList = new ArrayList();
-        for (Geofence geofence : triggeringGeofences) {
-            triggeringGeofencesIdsList.add(geofence.getRequestId());
-        }
-        String triggeringGeofencesIdsString = TextUtils.join(", ", triggeringGeofencesIdsList);
-
-        return geofenceTransitionString + ": " + triggeringGeofencesIdsString;
-    }
-
-    private void sendNotification(String notificationDetails) {
+    private void sendNotification(Context context, String notificationDetails) {
         // Create an explicit content Intent that starts the main Activity.
-        Intent notificationIntent = new Intent(context, ListActivity.class);
+        Intent notificationIntent = new Intent(context, ListActivity.class)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         // Construct a task stack.
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
 
         // Add the main Activity to the task stack as the parent.
-        stackBuilder.addParentStack(ListActivity.class);
+         stackBuilder.addParentStack(ListActivity.class);
 
         // Push the content Intent onto the stack.
         stackBuilder.addNextIntent(notificationIntent);
@@ -103,8 +51,8 @@ public class NotificationReceiver extends BroadcastReceiver {
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
                         R.mipmap.ic_launcher))
                 .setColor(Color.RED)
-                .setContentTitle(notificationDetails)
-                .setContentText(context.getString(R.string.geofence_transition_notification_text))
+                .setContentTitle(notificationDetails) //title
+                .setContentText(context.getString(R.string.geofence_transition_notification_text)) //description
                 .setContentIntent(notificationPendingIntent);
 
         // Dismiss notification once the user touches it.
@@ -117,16 +65,18 @@ public class NotificationReceiver extends BroadcastReceiver {
         // Issue the notification
         mNotificationManager.notify(0, builder.build());
     }
-
-
-    private String getTransitionString(int transitionType) {
-        switch (transitionType) {
-            case Geofence.GEOFENCE_TRANSITION_ENTER:
-                return context.getString(R.string.geofence_transition_entered);
-            case Geofence.GEOFENCE_TRANSITION_EXIT:
-                return context.getString(R.string.geofence_transition_exited);
-            default:
-                return context.getString(R.string.unknown_geofence_transition);
-        }
-    }
 }
+//    public void sendNotification(Context context) {
+//        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+//        Intent x = new Intent(context, ListActivity.class);
+//        Notification notification = new Notification.Builder(context)
+//                .setContentIntent(PendingIntent.getActivity(context, 0, x, PendingIntent.FLAG_UPDATE_CURRENT))
+//                .setDefaults(Notification.DEFAULT_ALL)
+//                .setAutoCancel(true).setWhen(System.currentTimeMillis())
+//                .setContentTitle("AREA ENTER / EXIT  ")
+//                .setSmallIcon(R.mipmap.ic_launcher)
+//                .setContentText("You leave area ")
+//                .build();
+//        notification.flags |= Notification.FLAG_INSISTENT;
+//        nm.notify(0, notification);
+//    }

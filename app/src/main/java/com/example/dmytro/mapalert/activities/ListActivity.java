@@ -54,6 +54,7 @@ public class ListActivity extends ActionBarActivity {
         recyclerView.setItemAnimator(itemAnimator);
 
         startService(new Intent(this, BackgroundLocationService.class));
+        //add all location coordinates to intent
     }
 
 

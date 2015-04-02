@@ -251,7 +251,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 //                    Picasso.with(getApplicationContext()).load(imagePathFile)
 //                            .placeholder(R.mipmap.ic_action_house)
 //                            .into(mLocPhoto);
-
                     break;
             }
         }
@@ -367,7 +366,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
             mTimeSelected = false;
             mTimeLayout.setVisibility(View.GONE);
         }
-
     }
 
     /////------------------------ TimePicker listener ---------------------------------------------------------------
