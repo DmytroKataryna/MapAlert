@@ -8,23 +8,30 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.example.dmytro.mapalert.pojo.LocationServiceItem;
+import com.example.dmytro.mapalert.pojo.LocationServiceItemConverted;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.ArrayList;
+
 public class BackgroundLocationService extends Service implements GoogleApiClient.ConnectionCallbacks, LocationListener {
 
     private static final String TAG = "BackgroundServiceTAG";
+
     public static final String BROADCAST_ACTION = "com.example.mapalert.location.receiver";
+    public static final String NOTIF_DESCRIPTION_EXTRA = "notification_receiver_description";
+    public static final String NOTIF_TITLE_EXTRA = "notification_receiver_title";
+
     public static final Integer RADIUS_IN_METERS = 50;
 
     private GoogleApiClient mGoogleApiClient;
-    private final Handler handler = new Handler();
+    private ArrayList<LocationServiceItemConverted> locationItems;
 
     protected LocationRequest mLocationRequest;
     protected Location mCurrentLocation;
@@ -45,12 +52,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .build();
-        createLocationRequest();
-    }
 
-    private void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-
         mLocationRequest.setInterval(10000);
         mLocationRequest.setFastestInterval(50000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -59,9 +62,9 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        mGoogleApiClient.connect();
         //get data from intent  (latitude and longitude ) and add it to List
-
+        locationItems = convertItemLatLngToLocation((ArrayList<LocationServiceItem>) intent.getSerializableExtra("LocationServiceArray"));
+        mGoogleApiClient.connect();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -72,6 +75,10 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         startLocationUpdates();
     }
 
+    protected void startLocationUpdates() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient, mLocationRequest, this);
+    }
 
     @Override
     public void onConnectionSuspended(int i) {
@@ -81,10 +88,6 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         mGoogleApiClient.connect();
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
 
     @Override
     public void onDestroy() {
@@ -99,7 +102,6 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (location != null) {
-            Log.d(TAG, "LAT " + location.getLatitude() + " LNG " + location.getLongitude());
             return location;
         }
         //if location null move camera to London
@@ -111,20 +113,44 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
     @Override
     public void onLocationChanged(Location location) {
-        //SFO hard coding
-        Location center = new Location("provider");
-        center.setLatitude(37.621313);
-        center.setLongitude(-122.378955);
+        checkForBelongingToArea(mCurrentLocation);
+    }
 
-        float distance = location.distanceTo(center);
+    private void checkForBelongingToArea(Location userCurrentLocation) {
+        for (LocationServiceItemConverted location : locationItems) {
+            float distance = userCurrentLocation.distanceTo(location.getLocation());
 
-        if (distance < RADIUS_IN_METERS) {
-            sendBroadcast(new Intent(BROADCAST_ACTION));
+            //send notification that user enter area
+            if (distance < RADIUS_IN_METERS && !location.isInside()) {
+                location.setInside(true);
+                sendBroadcast(new Intent(BROADCAST_ACTION)
+                        .putExtra(NOTIF_TITLE_EXTRA, "Entered " + location.getTitle() + " area")
+                        .putExtra(NOTIF_DESCRIPTION_EXTRA, location.getDescription()));
+            }
+            //send notification that user leave area
+            if (distance > RADIUS_IN_METERS && location.isInside()) {
+                location.setInside(false);
+                sendBroadcast(new Intent(BROADCAST_ACTION)
+                        .putExtra(NOTIF_TITLE_EXTRA, "Exited " + location.getTitle() + " area")
+                        .putExtra(NOTIF_DESCRIPTION_EXTRA, location.getDescription()));
+            }
         }
     }
 
-    protected void startLocationUpdates() {
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, mLocationRequest, this);
+
+    public ArrayList<LocationServiceItemConverted> convertItemLatLngToLocation(ArrayList<LocationServiceItem> locationServiceItems) {
+        ArrayList<LocationServiceItemConverted> result = new ArrayList<>();
+        for (LocationServiceItem location : locationServiceItems) {
+            Location loc = new Location("provider");
+            loc.setLatitude(location.getLocationItem().getLatitude());
+            loc.setLongitude(location.getLocationItem().getLongitude());
+            result.add(new LocationServiceItemConverted(location.getLocationItem().getTitle(), location.getLocationItem().getDescription(), loc, location.isInside()));
+        }
+        return result;
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 }

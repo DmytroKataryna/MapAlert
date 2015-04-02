@@ -13,26 +13,33 @@ import android.support.v4.app.TaskStackBuilder;
 import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.ListActivity;
 
+import java.util.Random;
+
 
 public class NotificationReceiver extends BroadcastReceiver {
 
     protected static final String TAG = "geofence-broadcast";
 
+    private static String title;
+    private static String description;
+
+
     @Override
     public void onReceive(Context context, Intent intent) {
-        sendNotification(context, "LEAVE AREA");
+        title = intent.getStringExtra(BackgroundLocationService.NOTIF_TITLE_EXTRA);
+        description = intent.getStringExtra(BackgroundLocationService.NOTIF_DESCRIPTION_EXTRA);
+        sendNotification(context, title, description);
     }
 
-    private void sendNotification(Context context, String notificationDetails) {
+    private void sendNotification(Context context, String notificationTitle, String notificationDescription) {
         // Create an explicit content Intent that starts the main Activity.
-        Intent notificationIntent = new Intent(context, ListActivity.class)
-                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        Intent notificationIntent = new Intent(context, ListActivity.class);
 
         // Construct a task stack.
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
 
         // Add the main Activity to the task stack as the parent.
-         stackBuilder.addParentStack(ListActivity.class);
+        stackBuilder.addParentStack(ListActivity.class);
 
         // Push the content Intent onto the stack.
         stackBuilder.addNextIntent(notificationIntent);
@@ -51,8 +58,8 @@ public class NotificationReceiver extends BroadcastReceiver {
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
                         R.mipmap.ic_launcher))
                 .setColor(Color.RED)
-                .setContentTitle(notificationDetails) //title
-                .setContentText(context.getString(R.string.geofence_transition_notification_text)) //description
+                .setContentTitle(notificationTitle) //title
+                .setContentText(notificationDescription) //description
                 .setContentIntent(notificationPendingIntent);
 
         // Dismiss notification once the user touches it.
@@ -62,21 +69,8 @@ public class NotificationReceiver extends BroadcastReceiver {
         NotificationManager mNotificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
+
         // Issue the notification
-        mNotificationManager.notify(0, builder.build());
+        mNotificationManager.notify(new Random().nextInt(1000), builder.build());
     }
 }
-//    public void sendNotification(Context context) {
-//        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-//        Intent x = new Intent(context, ListActivity.class);
-//        Notification notification = new Notification.Builder(context)
-//                .setContentIntent(PendingIntent.getActivity(context, 0, x, PendingIntent.FLAG_UPDATE_CURRENT))
-//                .setDefaults(Notification.DEFAULT_ALL)
-//                .setAutoCancel(true).setWhen(System.currentTimeMillis())
-//                .setContentTitle("AREA ENTER / EXIT  ")
-//                .setSmallIcon(R.mipmap.ic_launcher)
-//                .setContentText("You leave area ")
-//                .build();
-//        notification.flags |= Notification.FLAG_INSISTENT;
-//        nm.notify(0, notification);
-//    }

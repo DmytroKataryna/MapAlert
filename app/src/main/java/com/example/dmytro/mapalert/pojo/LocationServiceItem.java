@@ -1,33 +1,34 @@
 package com.example.dmytro.mapalert.pojo;
 
-import android.location.Location;
+import java.io.Serializable;
 
-public class LocationServiceItem {
+public class LocationServiceItem implements Serializable {
 
-    private Location location;
-    private boolean isInside;
+    private LocationItem locationItem;
+    private boolean inside;
 
     public LocationServiceItem() {
     }
 
-    public LocationServiceItem(Location location, boolean isInside) {
-        this.location = location;
-        this.isInside = isInside;
+    public LocationServiceItem(LocationItem locationItem, boolean inside) {
+        this.locationItem = locationItem;
+        this.inside = inside;
     }
 
-    public Location getLocation() {
-        return location;
+    public LocationItem getLocationItem() {
+        return locationItem;
     }
 
-    public void setLocation(Location location) {
-        this.location = location;
+    public void setLocationItem(LocationItem locationItem) {
+        this.locationItem = locationItem;
     }
+
 
     public boolean isInside() {
-        return isInside;
+        return inside;
     }
 
     public void setInside(boolean isInside) {
-        this.isInside = isInside;
+        this.inside = isInside;
     }
 }
