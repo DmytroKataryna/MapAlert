@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Address;
-import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
@@ -14,6 +13,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,6 +39,8 @@ import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationItem;
 import com.example.dmytro.mapalert.utils.ImageUtil;
 import com.example.dmytro.mapalert.utils.LocationDataSource;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -53,14 +55,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
 
-//location activity (almost done)
-
 //Я старався повиносити частини коду в інші класи , бо цей вийшов дуже занадто громіздкий
 //ще не чистив код (будуть попадатися зміні які не використовують і т.д.)
 public class LocationActivity extends ActionBarActivity implements OnMapReadyCallback, View.OnClickListener, CompoundButton.OnCheckedChangeListener,
-        TimePicker.OnTimeChangedListener, View.OnFocusChangeListener {
+        TimePicker.OnTimeChangedListener, View.OnFocusChangeListener, GoogleApiClient.ConnectionCallbacks {
+
+    private static final String TAG = "LocationActivity";
 
     private static Integer dataBaseId;
+    private GoogleApiClient mApiClient;
 
     //Image intent constants
     private static final int SELECT_FILE = 1111;
@@ -76,6 +79,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     private ScrollView scrollView;
     private Marker locationMarker;
     private ImageButton mSearchButton;
+
     //Image
     private ImageView mLocPhoto;
     private Bitmap bitmap;
@@ -141,15 +145,13 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         mapFragment = (CustomMapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
 
-        //Custom Map Fragment , where i handle scroll UP/DOWn problems
-        ((CustomMapFragment) getFragmentManager().findFragmentById(R.id.map)).setListener(new CustomMapFragment.OnTouchListener() {
-            @Override
-            public void onTouch() {
-                scrollView.requestDisallowInterceptTouchEvent(true);
-                //scrollView.scrollTo(scrollView.getBottom(), scrollView.getBottom());
-            }
-        });
-        mapFragment.getMapAsync(this);
+        mApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .build();
+
+        mApiClient.connect();
+
 
         //start edit mode (restore data )
         if (getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false))
@@ -255,53 +257,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         }
     }
 
-    //  --------------------------------- Google Maps -----------------------------------------
-    @Override
-    public void onMapReady(final GoogleMap googleMap) {
-        this.mGoogleMap = googleMap;
-
-        googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-        googleMap.setMyLocationEnabled(true);
-
-        ///////////Move camera to user position or move to selected position
-
-        if (longitude == 0d & longitude == 0d) {
-            locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(getUserLocation().latitude, getUserLocation().longitude)));
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(getUserLocation().latitude, getUserLocation().longitude), 15));
-        } else {
-            locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(latitude, longitude), 15));
-        }
-        ////////// On Map click & On Location Change
-
-        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                //hide keyboard
-                hideSoftKeyboard();
-
-                //remove previous marker (on screen should be placed just single(one) marker)
-                if (locationMarker != null) {
-                    locationMarker.remove();
-                    latitude = 0d;
-                    longitude = 0d;
-                }
-                //set marker
-                locationMarker = googleMap.addMarker(new MarkerOptions().position(latLng));
-                latitude = latLng.latitude;
-                longitude = latLng.longitude;
-            }
-        });
-
-        googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-            @Override
-            public void onMyLocationChange(Location location) {
-                //compare this coordinates with location coordinate and if user is out of area send notification
-            }
-        });
-    }
 
     @Override
     public void onClick(View view) {
@@ -397,23 +352,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         return true;
     }
 
-    /////----------------------------------Find location by address  -------------------------------
 
-    public LatLng findLocation(String address) {
-        Geocoder gc = new Geocoder(getApplicationContext(), Locale.getDefault());
-        List<Address> addresses;
-        try {
-            addresses = gc.getFromLocationName(address, 1);
-            if (addresses.size() > 0) {
-                return new LatLng(addresses.get(0).getLatitude(), addresses.get(0).getLongitude());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //if no addresses found move to user current location
-        Toast.makeText(this, "No address found", Toast.LENGTH_SHORT).show();
-        return new LatLng(getUserLocation().latitude, getUserLocation().longitude);
-    }
     /////------------------------ Switcher listener (Show/Hide time layout) ----------------------------------------------
 
     @Override
@@ -476,25 +415,112 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     }
 
 
-    /////--------------------------------Get User Location--------------------------------
-
-    public LatLng getUserLocation() {
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        Criteria criteria = new Criteria();
-
-        final Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
-        if (location != null) {
-            return new LatLng(location.getLatitude(), location.getLongitude());
-        }
-        //if location null move camera to London
-        return new LatLng(51.50722, -0.12750);
-    }
-
     /////--------------------------------------------------------------------------------------
     @Override
     protected void onDestroy() {
         super.onDestroy();
         //dataSource.close();  //make bug
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        //Custom Map Fragment , where i handle scroll UP/DOWn problems
+        ((CustomMapFragment) getFragmentManager().findFragmentById(R.id.map)).setListener(new CustomMapFragment.OnTouchListener() {
+            @Override
+            public void onTouch() {
+                scrollView.requestDisallowInterceptTouchEvent(true);
+                //scrollView.scrollTo(scrollView.getBottom(), scrollView.getBottom());
+            }
+        });
+        mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        // The connection to Google Play services was lost for some reason. We call connect() to
+        // attempt to re-establish the connection.
+        Log.i(TAG, "Connection suspended");
+        mApiClient.connect();
+    }
+
+    //  --------------------------------- Google Maps -----------------------------------------
+    @Override
+    public void onMapReady(final GoogleMap googleMap) {
+        this.mGoogleMap = googleMap;
+
+        googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+        googleMap.setMyLocationEnabled(true);
+
+        ///////////Move camera to user position or move to selected position
+
+        if (longitude == 0d & longitude == 0d) {
+            locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(getUserLocation().latitude, getUserLocation().longitude)));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(getUserLocation().latitude, getUserLocation().longitude), 15));
+        } else {
+            locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(latitude, longitude), 15));
+        }
+        ////////// On Map click & On Location Change
+
+        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                //hide keyboard
+                hideSoftKeyboard();
+
+                //remove previous marker (on screen should be placed just single(one) marker)
+                if (locationMarker != null) {
+                    locationMarker.remove();
+                    latitude = 0d;
+                    longitude = 0d;
+                }
+                //set marker
+                locationMarker = googleMap.addMarker(new MarkerOptions().position(latLng));
+                latitude = latLng.latitude;
+                longitude = latLng.longitude;
+            }
+        });
+
+        googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+            @Override
+            public void onMyLocationChange(Location location) {
+                //compare this coordinates with location coordinate and if user is out of area send notification
+            }
+        });
+    }
+
+    /////----------------------------------Find location by address  -------------------------------
+
+    public LatLng findLocation(String address) {
+        Geocoder gc = new Geocoder(getApplicationContext(), Locale.getDefault());
+        List<Address> addresses;
+        try {
+            addresses = gc.getFromLocationName(address, 1);
+            if (addresses.size() > 0) {
+                return new LatLng(addresses.get(0).getLatitude(), addresses.get(0).getLongitude());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //if no addresses found move to user current location
+        Toast.makeText(this, "No address found", Toast.LENGTH_SHORT).show();
+        return new LatLng(getUserLocation().latitude, getUserLocation().longitude);
+    }
+
+    /////--------------------------------Get User Location--------------------------------
+
+    public LatLng getUserLocation() {
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+////        Criteria criteria = new Criteria();
+
+        final Location location = LocationServices.FusedLocationApi.getLastLocation(mApiClient);
+        if (location != null) {
+            return new LatLng(location.getLatitude(), location.getLongitude());
+        }
+        //if location null move camera to London
+        return new LatLng(51.50722, -0.12750);
     }
 }
 
