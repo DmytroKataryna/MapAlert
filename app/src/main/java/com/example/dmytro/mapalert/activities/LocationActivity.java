@@ -39,7 +39,6 @@ import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationItem;
 import com.example.dmytro.mapalert.utils.ImageUtil;
 import com.example.dmytro.mapalert.utils.LocationDataSource;
-import com.example.dmytro.mapalert.utils.PreferencesUtils;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -170,7 +169,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         imagePath = loc.getImagePath();  // get image path from db
 
         Picasso.with(getApplicationContext()).load(new File(imagePath))
-                .placeholder(R.mipmap.ic_action_house)
+                .placeholder(R.drawable.ic_image_camera)
                 .into(mLocPhoto);
 
         if (loc.isTimeSelected()) {
@@ -211,7 +210,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                     if (imagePath != null) {
                         new File(imagePath).delete();
                     }
-                    bitmap = ImageUtil.decodeFile(f.getPath());      // create Bitmap
+                    bitmap = ImageUtil.getCroppedBitmap(ImageUtil.decodeFile(f.getPath()));      // create Bitmap
                     imagePathFile = ImageUtil.saveToInternalStorage(getApplicationContext(), bitmap);
 
                     mLocPhoto.post(new Runnable() {
@@ -237,7 +236,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                         new File(imagePath).delete();
                     }
 
-                    bitmap = ImageUtil.decodeFile(selectedImagePath);  // create Bitmap
+                    bitmap = ImageUtil.getCroppedBitmap(ImageUtil.decodeFile(selectedImagePath));  // create Bitmap
                     imagePathFile = ImageUtil.saveToInternalStorage(getApplicationContext(), bitmap);
 
                     //mLocPhoto.setImageBitmap(bitmap);
@@ -314,7 +313,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                 if (!checkIfAvailableToLogin()) return false;
 
                 if (imagePath == null) //if nothing selected , save default img
-                    imagePath = "drawable://" + R.mipmap.ic_action_house;
+                    imagePath = "drawable://" + R.drawable.ic_image_camera;
 
                 if (mTimeSelected) { //depends on time switcher selection , it is saved different object
                     loc = new LocationItem(mTitle, mDescription, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);

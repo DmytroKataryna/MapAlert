@@ -105,15 +105,13 @@
                             android:layout_width="150dp"
                             android:layout_height="95dp"
                             android:id="@+id/locationImageView"
-                            android:src="@mipmap/ic_action_house"
+                            android:src="@drawable/ic_image_camera"
                             android:scaleType="fitCenter"
                             android:layout_gravity="end"
                             android:layout_marginLeft="150dp"
                             android:layout_marginTop="4dp"
                             android:paddingTop="4dp"
                             app:riv_corner_radius="30dip"
-                            app:riv_border_width="2dip"
-                            app:riv_border_color="#33b5e5"
                             app:riv_mutate_background="true" />
 
 
