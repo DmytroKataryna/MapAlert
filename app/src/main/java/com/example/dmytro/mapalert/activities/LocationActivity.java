@@ -142,7 +142,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         mLocPhoto = (ImageView) findViewById(R.id.locationImageView);
         mLocPhoto.setOnClickListener(this);
 
-        mapFragment = (CustomMapFragment) getFragmentManager()
+        mapFragment = (CustomMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
         mApiClient = new GoogleApiClient.Builder(this)
@@ -423,7 +423,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     @Override
     public void onConnected(Bundle bundle) {
         //Custom Map Fragment , where i handle scroll UP/DOWn problems
-        ((CustomMapFragment) getFragmentManager().findFragmentById(R.id.map)).setListener(new CustomMapFragment.OnTouchListener() {
+        ((CustomMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).setListener(new CustomMapFragment.OnTouchListener() {
             @Override
             public void onTouch() {
                 scrollView.requestDisallowInterceptTouchEvent(true);
