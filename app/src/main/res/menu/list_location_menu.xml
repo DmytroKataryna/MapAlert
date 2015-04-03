@@ -4,8 +4,15 @@
     tools:context=".MainActivity">
 
     <item
-        android:id="@+id/add"
-        android:icon="@drawable/ic_content_add"
-        android:title="Add"
+        android:id="@+id/track"
+        android:title="Track"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/myswitch"
+        android:title=""
+        app:showAsAction="always"
+        app:actionLayout="@layout/custom_switch_layout" />
+
 </menu>
+

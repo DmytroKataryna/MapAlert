@@ -1,4 +1,4 @@
-package com.example.dmytro.mapalert.DBUtils;
+package com.example.dmytro.mapalert.utils;
 
 
 import android.app.Activity;
@@ -7,6 +7,11 @@ import android.content.ContextWrapper;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.provider.MediaStore;
 
@@ -39,6 +44,37 @@ public class ImageUtil {
         return null;
     }
 
+    public static Bitmap getCroppedBitmap(Bitmap bitmap) {
+        Bitmap output;
+
+        if (bitmap.getWidth() > bitmap.getHeight()) {
+            output = Bitmap.createBitmap(bitmap.getHeight(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        } else {
+            output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getWidth(), Bitmap.Config.ARGB_8888);
+        }
+
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+        float r = 0;
+
+        if (bitmap.getWidth() > bitmap.getHeight()) {
+            r = bitmap.getHeight() / 2;
+        } else {
+            r = bitmap.getWidth() / 2;
+        }
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawCircle(r, r, r, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        return output;
+    }
 
     public static File saveToInternalStorage(Context context, Bitmap bitmapImage) {
         ContextWrapper cw = new ContextWrapper(context.getApplicationContext());
@@ -75,33 +111,4 @@ public class ImageUtil {
         } else
             return null;
     }
-
-//
-//    private void loadImageFromStorage(Context context, final ImageView imageView, String path) {
-//        try {
-//            File f = new File(path);
-//            final Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
-//            imageView.post(new Runnable() {
-//                @Override
-//                public void run() {
-//                    imageView.setImageBitmap(b);
-//                }
-//            });
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//    public static byte[] bitmapToByteArray(Bitmap bm) {
-//        //convert Bitmap to byte array
-//        ByteArrayOutputStream blob = new ByteArrayOutputStream();
-//        bm.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, blob);
-//        return blob.toByteArray();
-//    }
-
-//    public static Bitmap byteArrayToBitmap(byte[] array) {
-//        //convert  byte array to Bitmap
-//        return BitmapFactory.decodeByteArray(array, 0, array.length);
-//    }
-
 }
