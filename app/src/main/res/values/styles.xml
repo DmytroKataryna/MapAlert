@@ -3,8 +3,14 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
 
-        <item name="android:actionBarStyle">@style/MyActionBar</item>
+        <item name="colorControlActivated">@color/dialog_blue</item>
+        <item name="colorControlHighlight">@color/dialog_blue</item>
 
+        <item name="android:dialogTheme">@style/CustomDialog</item>
+        <item name="android:alertDialogTheme">@style/CustomDialog</item>
+        <item name="android:checkboxStyle">@style/CustomCheckBox</item>
+
+        <item name="android:actionBarStyle">@style/MyActionBar</item>
         <!-- Support library compatibility -->
 
         <item name="actionBarStyle">@style/MyActionBar</item>
@@ -17,6 +23,16 @@
 
         <!-- Support library compatibility -->
         <item name="background">@drawable/bar_background</item>
+    </style>
+
+
+    <style name="CustomDialog" parent="@android:style/Theme.Holo.Light.Dialog">
+        <item name="android:checkboxStyle">@style/CustomCheckBox</item>
+    </style>
+
+    <style name="CustomCheckBox" parent="@android:style/Widget.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/btn_check</item>
+        <item name="android:checkMark">@drawable/btn_check</item>
     </style>
 
 </resources>

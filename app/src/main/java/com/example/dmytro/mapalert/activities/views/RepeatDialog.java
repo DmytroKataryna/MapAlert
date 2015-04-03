@@ -2,8 +2,10 @@ package com.example.dmytro.mapalert.activities.views;
 
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.ColorDrawable;
 import android.widget.TextView;
 
 import java.util.TreeSet;
@@ -32,28 +34,29 @@ public class RepeatDialog {
         final CharSequence[] items =
                 {"Every Monday", "Every Tuesday ", "Every Wednesday ", "Every Thursday", "Every Friday", "Every Saturday", "Every Sunday"};
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Repeat");
-        builder.setMultiChoiceItems(items, checkedDialogItems, new DialogInterface.OnMultiChoiceClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                checkedDialogItems[which] = isChecked;
-                if (isChecked) {
-                    selectedItems.add(which);
-                } else if (selectedItems.contains(which)) {
-                    selectedItems.remove(Integer.valueOf(which));
-                }
-            }
-        }).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        AlertDialog dialog = new AlertDialog.Builder(context)
+                .setTitle("Repeat")
+                .setMultiChoiceItems(items, checkedDialogItems, new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                        checkedDialogItems[which] = isChecked;
+                        if (isChecked) {
+                            selectedItems.add(which);
+                        } else if (selectedItems.contains(which)) {
+                            selectedItems.remove(Integer.valueOf(which));
+                        }
+                    }
+                }).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
 
-                mRepeatTextView.setText(convertDays(selectedItems));
+                        mRepeatTextView.setText(convertDays(selectedItems));
 
-            }
-        });
-        //show dialog
-        builder.create().show();
+                    }
+                }).create();
+        //delete background
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.show();
     }
 
     public String convertDays(TreeSet<Integer> selectedItems) {

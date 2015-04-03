@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationItem;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +65,9 @@ public class LocationDataSource {
         sdb.update(DBHelper.DATABASE_TABLE, values, DBHelper.ID_COLUMN + "=" + id, null);
     }
 
-    public void deleteLocation(Integer id) {
+    //delete location from DB and also image from internal storage
+    public void deleteLocation(Integer id, String imagePath) {
+        new File(imagePath).delete();
         sdb.delete(DBHelper.DATABASE_TABLE, DBHelper.ID_COLUMN + " = ?", new String[]{String.valueOf(id)});
     }
 

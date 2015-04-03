@@ -1,12 +1,15 @@
 package com.example.dmytro.mapalert.activities.views;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.view.View;
+
+import com.afollestad.materialdialogs.GravityEnum;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.example.dmytro.mapalert.R;
 
 import java.io.File;
 
@@ -26,35 +29,36 @@ public class PhotoDialog {
     public void createPhotoDialog() {
         final CharSequence[] items = {"Take Photo", "Choose from Library",
                 "Cancel"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle("Add Photo!");
-        builder.setItems(items, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case FIRST:
-                        Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                        File f = new File(Environment.getExternalStorageDirectory(), "temp.jpg");
-                        i.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
-                        activity.startActivityForResult(i, REQUEST_CAMERA);
-                        break;
-                    case SECOND:
-                        Intent intent = new Intent(
-                                Intent.ACTION_PICK,
-                                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                        intent.setType("image/*");
-                        activity.startActivityForResult(
-                                Intent.createChooser(intent, "Select File"),
-                                SELECT_FILE);
-                        break;
-                    case THIRD:
-                        dialog.dismiss();
-                        break;
-                }
-            }
-        });
-        builder.create().show();
+
+        new MaterialDialog.Builder(activity)
+                .title("Add Photo!")
+                .titleGravity(GravityEnum.CENTER)
+                .itemColorRes(R.color.dialog_blue)
+                .items(items)
+                .itemsCallback(new MaterialDialog.ListCallback() {
+                    @Override
+                    public void onSelection(MaterialDialog materialDialog, View view, int which, CharSequence charSequence) {
+                        switch (which) {
+                            case FIRST:
+                                Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                File f = new File(Environment.getExternalStorageDirectory(), "temp.jpg");
+                                i.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+                                activity.startActivityForResult(i, REQUEST_CAMERA);
+                                break;
+                            case SECOND:
+                                Intent intent = new Intent(
+                                        Intent.ACTION_PICK,
+                                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                intent.setType("image/*");
+                                activity.startActivityForResult(
+                                        Intent.createChooser(intent, "Select File"),
+                                        SELECT_FILE);
+                                break;
+                            case THIRD:
+                                materialDialog.dismiss();
+                                break;
+                        }
+                    }
+                }).show();
     }
-
-
 }

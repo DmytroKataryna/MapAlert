@@ -1,16 +1,20 @@
 package com.example.dmytro.mapalert.activities.views;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.example.dmytro.mapalert.DBUtils.LocationDataSource;
 import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.LocationActivity;
@@ -64,8 +68,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     private void delete(CursorLocation item) {
-        //delete from DB
-        dataSource.deleteLocation(item.getId());
+        //delete location from DB and also image from internal storage
+        dataSource.deleteLocation(item.getId(), item.getItem().getImagePath());
 
         int position = items.indexOf(item);
         items.remove(position);
@@ -125,7 +129,22 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         @Override
         public void onClick(View v) {
-            delete(item);
+
+            new MaterialDialog.Builder(activity)
+                    .title("Delete Location ?")
+                    .content("Are you sure you want to permanently delete this location?")
+                    .positiveText("Delete")
+                    .negativeText("Cancel")
+                    .positiveColorRes(R.color.positive_button_red)
+                    .negativeColorRes(R.color.negative_button_blue)
+                    .titleColorRes(R.color.dialog_blue)
+                    .callback(new MaterialDialog.ButtonCallback() {
+                        @Override
+                        public void onPositive(MaterialDialog dialog) {
+                            delete(item);
+                        }
+                    })
+                    .show();
         }
 
         public void setLocation(CursorLocation locationItem) {

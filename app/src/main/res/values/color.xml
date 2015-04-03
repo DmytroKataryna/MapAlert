@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="layout_background">#9E9E9E</color>
+    <color name="positive_button_red">#E53935</color>
+    <color name="negative_button_blue">#33b5e5</color>
+    <color name="dialog_blue">#03A9F4</color>
+</resources>
