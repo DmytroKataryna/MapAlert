@@ -35,4 +35,21 @@
         <item name="android:checkMark">@drawable/btn_check</item>
     </style>
 
+
+    <style name="ListLocationTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+
+        <item name="colorControlActivated">@color/positive_button_red</item>
+        <item name="colorControlHighlight">@color/dialog_blue</item>
+
+        <item name="android:dialogTheme">@style/CustomDialog</item>
+        <item name="android:alertDialogTheme">@style/CustomDialog</item>
+        <item name="android:checkboxStyle">@style/CustomCheckBox</item>
+
+        <item name="android:actionBarStyle">@style/MyActionBar</item>
+        <!-- Support library compatibility -->
+
+        <item name="actionBarStyle">@style/MyActionBar</item>
+
+    </style>
+
 </resources>

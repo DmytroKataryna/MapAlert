@@ -75,33 +75,4 @@ public class ImageUtil {
         } else
             return null;
     }
-
-//
-//    private void loadImageFromStorage(Context context, final ImageView imageView, String path) {
-//        try {
-//            File f = new File(path);
-//            final Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
-//            imageView.post(new Runnable() {
-//                @Override
-//                public void run() {
-//                    imageView.setImageBitmap(b);
-//                }
-//            });
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//    public static byte[] bitmapToByteArray(Bitmap bm) {
-//        //convert Bitmap to byte array
-//        ByteArrayOutputStream blob = new ByteArrayOutputStream();
-//        bm.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, blob);
-//        return blob.toByteArray();
-//    }
-
-//    public static Bitmap byteArrayToBitmap(byte[] array) {
-//        //convert  byte array to Bitmap
-//        return BitmapFactory.decodeByteArray(array, 0, array.length);
-//    }
-
 }

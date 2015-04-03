@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -8,6 +8,17 @@
         android:id="@+id/locationRecycleList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#BDBDBD"/>
+        android:background="#BDBDBD" />
 
-</LinearLayout>
+    <com.melnykov.fab.FloatingActionButton
+        android:id="@+id/fab_add_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_content_plus"
+        fab:fab_colorNormal="@color/dialog_blue"
+        fab:fab_colorPressed="#039BE5"
+        android:onClick="addButtonListener" />
+
+</FrameLayout>

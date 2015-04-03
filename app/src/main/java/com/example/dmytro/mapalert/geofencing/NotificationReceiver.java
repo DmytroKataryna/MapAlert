@@ -1,4 +1,4 @@
-package com.example.dmytro.mapalert.geofencing.v2;
+package com.example.dmytro.mapalert.geofencing;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;

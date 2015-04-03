@@ -1,4 +1,4 @@
-package com.example.dmytro.mapalert.geofencing.v2;
+package com.example.dmytro.mapalert.geofencing;
 
 import android.app.AlarmManager;
 import android.app.NotificationManager;
@@ -13,12 +13,14 @@ import android.util.Log;
 
 import com.example.dmytro.mapalert.pojo.LocationServiceItem;
 import com.example.dmytro.mapalert.pojo.LocationServiceItemConverted;
+import com.example.dmytro.mapalert.utils.PreferencesUtils;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class BackgroundLocationService extends Service implements GoogleApiClient.ConnectionCallbacks, LocationListener {
 
@@ -30,6 +32,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
     public static final Integer RADIUS_IN_METERS = 50;
 
+    private PreferencesUtils utils;
     private GoogleApiClient mGoogleApiClient;
     private ArrayList<LocationServiceItemConverted> locationItems;
 
@@ -44,9 +47,11 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     public void onCreate() {
         super.onCreate();
 
+        utils = PreferencesUtils.get(getApplicationContext());
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         i = new Intent(BROADCAST_ACTION);
+
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
@@ -62,8 +67,13 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //get data from intent  (latitude and longitude ) and add it to List
-        locationItems = convertItemLatLngToLocation((ArrayList<LocationServiceItem>) intent.getSerializableExtra("LocationServiceArray"));
+        // utils.setServiceState(true);
+        if (intent != null && intent.getSerializableExtra("LocationServiceArray") != null) {
+            locationItems = new ArrayList<>(convertItemLatLngToLocation((ArrayList<LocationServiceItem>) intent.getSerializableExtra("LocationServiceArray")));
+            Log.d(TAG, "SIZE " + locationItems.size());
+        } else {
+            Log.d(TAG, "Intent or array is null");
+        }
         mGoogleApiClient.connect();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -92,8 +102,10 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     @Override
     public void onDestroy() {
         super.onDestroy();
+        //utils.setServiceState(false);
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         mGoogleApiClient.disconnect();
+        Log.d(TAG, "service destroyed");
     }
 
 
@@ -113,11 +125,18 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
     @Override
     public void onLocationChanged(Location location) {
-        checkForBelongingToArea(mCurrentLocation);
+        if (locationItems != null)
+            Log.d(TAG, "SIZE " + locationItems.size());
+        else
+            Log.d(TAG, "LocationItems is null");
+
+        checkForBelongingToArea(location, locationItems);
     }
 
-    private void checkForBelongingToArea(Location userCurrentLocation) {
-        for (LocationServiceItemConverted location : locationItems) {
+    private void checkForBelongingToArea(Location userCurrentLocation, ArrayList<LocationServiceItemConverted> listOfLocations) {
+        if (listOfLocations == null) return;
+
+        for (LocationServiceItemConverted location : listOfLocations) {
             float distance = userCurrentLocation.distanceTo(location.getLocation());
 
             //send notification that user enter area

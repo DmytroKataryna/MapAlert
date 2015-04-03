@@ -17,6 +17,7 @@ import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.LocationActivity;
 import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationItem;
+import com.melnykov.fab.FloatingActionButton;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -30,12 +31,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private List<CursorLocation> items;
     private LocationDataSource dataSource;
     private Activity activity;
+    private FloatingActionButton mAddButton;
 
-    public RecyclerViewAdapter(Activity activity, List<CursorLocation> items) {
+    public RecyclerViewAdapter(Activity activity, List<CursorLocation> items, FloatingActionButton mAddButton) {
         this.activity = activity;
         dataSource = LocationDataSource.get(activity);
         dataSource.open();
         this.items = items;
+        this.mAddButton = mAddButton;
     }
 
     @Override
@@ -71,6 +74,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         int position = items.indexOf(item);
         items.remove(position);
         notifyItemRemoved(position);
+
+        //after user delete location , add Button should be visible
+        if (mAddButton.hasShadow()) mAddButton.show();
     }
 
 
