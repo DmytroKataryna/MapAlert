@@ -1,25 +1,24 @@
 package com.example.dmytro.mapalert.activities.views;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.example.dmytro.mapalert.DBUtils.LocationDataSource;
 import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.LocationActivity;
 import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationItem;
+import com.example.dmytro.mapalert.utils.LocationDataSource;
+import com.example.dmytro.mapalert.utils.PreferencesUtils;
+import com.melnykov.fab.FloatingActionButton;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -33,12 +32,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private List<CursorLocation> items;
     private LocationDataSource dataSource;
     private Activity activity;
+    private FloatingActionButton mAddButton;
+    private PreferencesUtils utils;
 
-    public RecyclerViewAdapter(Activity activity, List<CursorLocation> items) {
+    public RecyclerViewAdapter(Activity activity, List<CursorLocation> items, FloatingActionButton mAddButton) {
         this.activity = activity;
+        utils = PreferencesUtils.get(activity);
         dataSource = LocationDataSource.get(activity);
         dataSource.open();
         this.items = items;
+        this.mAddButton = mAddButton;
     }
 
     @Override
@@ -55,7 +58,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         viewHolder.description.setText(trimText(locationItem.getDescription()));
         viewHolder.editButtonListener.setLocation(items.get(i));
         viewHolder.deleteButtonListener.setLocation(items.get(i));
-        viewHolder.layoutListener.setLocation(items.get(i));
+        //viewHolder.layoutListener.setLocation(items.get(i));
 
         Picasso.with(activity).load(new File(locationItem.getImagePath()))
                 .placeholder(R.mipmap.ic_action_house)
@@ -74,13 +77,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         int position = items.indexOf(item);
         items.remove(position);
         notifyItemRemoved(position);
+
+        //after user delete location , add Button should be visible
+        if (mAddButton.hasShadow()) mAddButton.show();
     }
 
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
         private LinearLayout itemLayout;
-        private ItemLayoutListener layoutListener;
+//        private ItemLayoutListener layoutListener;
 
         private TextView title, description;
         private ImageView photo;
@@ -93,8 +99,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             super(itemView);
 
             itemLayout = (LinearLayout) itemView.findViewById(R.id.itemLayout);
-            layoutListener = new ItemLayoutListener();
-            itemLayout.setOnClickListener(layoutListener);
+//            layoutListener = new ItemLayoutListener();
+//            itemLayout.setOnClickListener(layoutListener);
 
             title = (TextView) itemView.findViewById(R.id.titleItemTextView);
             description = (TextView) itemView.findViewById(R.id.descItemTextView);
@@ -149,21 +155,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         public void setLocation(CursorLocation locationItem) {
             this.item = locationItem;
-        }
-    }
-
-
-    private class ItemLayoutListener implements View.OnClickListener {
-        private CursorLocation location;
-
-        @Override
-        public void onClick(View v) {
-            //start another unchanged screen activity
-            //zапускатu detail активи з бандлом в якому знаходіться наш обєкт
-        }
-
-        public void setLocation(CursorLocation location) {
-            this.location = location;
         }
     }
 

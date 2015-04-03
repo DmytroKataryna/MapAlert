@@ -1,4 +1,4 @@
-package com.example.dmytro.mapalert.DBUtils;
+package com.example.dmytro.mapalert.utils;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -19,11 +19,13 @@ public class LocationDataSource {
     private static LocationDataSource sDataSource;
     public DBHelper dbHelper;
     public SQLiteDatabase sdb;
+    private PreferencesUtils utils;
 
     public static final String[] COLUMNS = {DBHelper.ID_COLUMN, DBHelper.LOCATION_COLUMN};
 
     public LocationDataSource(Context context) {
         dbHelper = new DBHelper(context);
+        utils = PreferencesUtils.get(context);
     }
 
     public static LocationDataSource get(Context c) {
@@ -53,6 +55,7 @@ public class LocationDataSource {
                 null, null, null);
         cursor.moveToFirst();
         CursorLocation item = cursorToLocation(cursor);
+        utils.setServiceDataChanged(true);
         cursor.close();
         return item;
     }
@@ -63,12 +66,14 @@ public class LocationDataSource {
         values.put(DBHelper.LOCATION_COLUMN, Serializer.serialize(locationItem));
 
         sdb.update(DBHelper.DATABASE_TABLE, values, DBHelper.ID_COLUMN + "=" + id, null);
+        utils.setServiceDataChanged(true);
     }
 
     //delete location from DB and also image from internal storage
     public void deleteLocation(Integer id, String imagePath) {
         new File(imagePath).delete();
         sdb.delete(DBHelper.DATABASE_TABLE, DBHelper.ID_COLUMN + " = ?", new String[]{String.valueOf(id)});
+        utils.setServiceDataChanged(true);
     }
 
     public List<CursorLocation> getAllLocationItems() throws IOException, ClassNotFoundException {
