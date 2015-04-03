@@ -11,16 +11,18 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.example.dmytro.mapalert.pojo.LocationServiceItem;
+import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationServiceItemConverted;
+import com.example.dmytro.mapalert.utils.LocationDataSource;
 import com.example.dmytro.mapalert.utils.PreferencesUtils;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 
 public class BackgroundLocationService extends Service implements GoogleApiClient.ConnectionCallbacks, LocationListener {
 
@@ -33,21 +35,24 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     public static final Integer RADIUS_IN_METERS = 50;
 
     private PreferencesUtils utils;
+    private LocationDataSource dataSource;
+
     private GoogleApiClient mGoogleApiClient;
     private ArrayList<LocationServiceItemConverted> locationItems;
 
     protected LocationRequest mLocationRequest;
     protected Location mCurrentLocation;
 
-    AlarmManager alarmManager;
-    NotificationManager nm;
-    Intent i;
+    private AlarmManager alarmManager;
+    private NotificationManager nm;
+    private Intent i;
 
     @Override
     public void onCreate() {
         super.onCreate();
-
         utils = PreferencesUtils.get(getApplicationContext());
+        dataSource = LocationDataSource.get(getApplicationContext());
+
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         i = new Intent(BROADCAST_ACTION);
@@ -62,18 +67,14 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         mLocationRequest.setInterval(10000);
         mLocationRequest.setFastestInterval(50000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // utils.setServiceState(true);
-        if (intent != null && intent.getSerializableExtra("LocationServiceArray") != null) {
-            locationItems = new ArrayList<>(convertItemLatLngToLocation((ArrayList<LocationServiceItem>) intent.getSerializableExtra("LocationServiceArray")));
-            Log.d(TAG, "SIZE " + locationItems.size());
-        } else {
-            Log.d(TAG, "Intent or array is null");
-        }
+        utils.setServiceState(true);
+        updateLocationData();
+
+        Log.d(TAG, "SIZE " + locationItems.size());
         mGoogleApiClient.connect();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -102,7 +103,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //utils.setServiceState(false);
+        utils.setServiceState(false);
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         mGoogleApiClient.disconnect();
         Log.d(TAG, "service destroyed");
@@ -125,6 +126,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
     @Override
     public void onLocationChanged(Location location) {
+        if (utils.isDataChanged()) updateLocationData();
+
         if (locationItems != null)
             Log.d(TAG, "SIZE " + locationItems.size());
         else
@@ -156,14 +159,13 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         }
     }
 
-
-    public ArrayList<LocationServiceItemConverted> convertItemLatLngToLocation(ArrayList<LocationServiceItem> locationServiceItems) {
+    public ArrayList<LocationServiceItemConverted> convertCursorItemLocationToServiceLocation(List<CursorLocation> cursorLocationItems) {
         ArrayList<LocationServiceItemConverted> result = new ArrayList<>();
-        for (LocationServiceItem location : locationServiceItems) {
+        for (CursorLocation location : cursorLocationItems) {
             Location loc = new Location("provider");
-            loc.setLatitude(location.getLocationItem().getLatitude());
-            loc.setLongitude(location.getLocationItem().getLongitude());
-            result.add(new LocationServiceItemConverted(location.getLocationItem().getTitle(), location.getLocationItem().getDescription(), loc, location.isInside()));
+            loc.setLatitude(location.getItem().getLatitude());
+            loc.setLongitude(location.getItem().getLongitude());
+            result.add(new LocationServiceItemConverted(location.getItem().getTitle(), location.getItem().getDescription(), loc, false));   //false isn't best idea, because user could be inSide so user will receiver additional notification
         }
         return result;
     }
@@ -171,5 +173,18 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    public void updateLocationData() {
+        dataSource.open();
+
+        //get Data from DB
+        try {
+            locationItems = convertCursorItemLocationToServiceLocation(dataSource.getAllLocationItems());
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        utils.setServiceDataChanged(false);
+        //dataSource.close();
     }
 }

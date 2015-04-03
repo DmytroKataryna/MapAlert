@@ -14,7 +14,9 @@ public class PreferencesUtils {
     private static final int KEY_MODE_PRIVATE = 0;
 
     //  *************** Service ********************
-    public static final String SERVICE_STATE = "boolean_service_state";
+    private static final String SERVICE_STATE = "boolean_service_state";
+    private static final String SERVICE_DATA_CHANGED = "boolean_service_data_changed";
+
 
     public PreferencesUtils(Context context) {
         sharedPref = context.getSharedPreferences(KEY_SHARED_PREF,
@@ -34,5 +36,13 @@ public class PreferencesUtils {
 
     public boolean isServiceAlive() {
         return sharedPref.getBoolean(SERVICE_STATE, false);
+    }
+
+    public void setServiceDataChanged(boolean serviceDataChanged) {
+        sharedPref.edit().putBoolean(SERVICE_DATA_CHANGED, serviceDataChanged).apply();
+    }
+
+    public boolean isDataChanged() {
+        return sharedPref.getBoolean(SERVICE_DATA_CHANGED, true);
     }
 }

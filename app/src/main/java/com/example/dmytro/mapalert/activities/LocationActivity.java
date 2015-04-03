@@ -39,6 +39,7 @@ import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationItem;
 import com.example.dmytro.mapalert.utils.ImageUtil;
 import com.example.dmytro.mapalert.utils.LocationDataSource;
+import com.example.dmytro.mapalert.utils.PreferencesUtils;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -64,6 +65,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
     private static Integer dataBaseId;
     private GoogleApiClient mApiClient;
+
 
     //Image intent constants
     private static final int SELECT_FILE = 1111;

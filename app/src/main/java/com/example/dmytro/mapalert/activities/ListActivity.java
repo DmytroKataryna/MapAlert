@@ -72,8 +72,8 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
         mAddButton.attachToRecyclerView(recyclerView);
 
         if (locationItems != null)
-            startService(new Intent(this, BackgroundLocationService.class)
-                    .putExtra("LocationServiceArray", createDataForService(locationItems)));
+            startService(new Intent(this, BackgroundLocationService.class));
+
 
     }
 
@@ -139,13 +139,13 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
 //        return super.onOptionsItemSelected(item);
 //    }
 
-    private ArrayList<LocationServiceItem> createDataForService(List<CursorLocation> locationCursorItems) {
-        locationItemsForService = new ArrayList<>();
-        for (CursorLocation location : locationCursorItems) {
-            locationItemsForService.add(new LocationServiceItem(location.getItem(), false));
-        }
-        return locationItemsForService;
-    }
+//    private ArrayList<LocationServiceItem> createDataForService(List<CursorLocation> locationCursorItems) {
+//        locationItemsForService = new ArrayList<>();
+//        for (CursorLocation location : locationCursorItems) {
+//            locationItemsForService.add(new LocationServiceItem(location.getItem(), false));
+//        }
+//        return locationItemsForService;
+//    }
 
     public void addButtonListener(View view) {
         startActivity(new Intent(this, LocationActivity.class));
@@ -154,11 +154,9 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
-
-            //startService(new Intent(this, BackgroundLocationService.class)
-            //      .putExtra("LocationServiceArray", createDataForService(locationItems)));
+            startService(new Intent(this, BackgroundLocationService.class));
         } else {
-            // stopService(new Intent(this, BackgroundLocationService.class));
+            stopService(new Intent(this, BackgroundLocationService.class));
         }
     }
 
