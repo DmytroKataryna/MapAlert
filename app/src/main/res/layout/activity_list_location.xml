@@ -17,8 +17,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:src="@drawable/ic_content_plus"
-        fab:fab_colorNormal="@color/dialog_blue"
-        fab:fab_colorPressed="#039BE5"
+        fab:fab_colorNormal="#4FC3F7"
+        fab:fab_colorPressed="#33b5e5"
         android:onClick="addButtonListener" />
 
 </FrameLayout>
