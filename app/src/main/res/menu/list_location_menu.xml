@@ -6,6 +6,7 @@
     <item
         android:id="@+id/track"
         android:title="Track"
+        android:enabled="false"
         app:showAsAction="ifRoom" />
 
     <item

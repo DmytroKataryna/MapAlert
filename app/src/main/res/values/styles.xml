@@ -21,8 +21,10 @@
         <!-- tab indicator -->
         <item name="android:background">@drawable/bar_background</item>
 
+
         <!-- Support library compatibility -->
         <item name="background">@drawable/bar_background</item>
+
     </style>
 
 
@@ -49,7 +51,5 @@
         <!-- Support library compatibility -->
 
         <item name="actionBarStyle">@style/MyActionBar</item>
-
     </style>
-
 </resources>

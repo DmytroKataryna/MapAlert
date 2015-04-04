@@ -61,7 +61,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         //viewHolder.layoutListener.setLocation(items.get(i));
 
         Picasso.with(activity).load(new File(locationItem.getImagePath()))
-                .placeholder(R.mipmap.ic_action_house)
+                .placeholder(R.drawable.ic_image_camera)
                 .into(viewHolder.photo);
     }
 

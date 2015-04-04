@@ -432,6 +432,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
             }
         });
         mapFragment.getMapAsync(this);
+        Toast.makeText(getApplicationContext(), "ZZ", Toast.LENGTH_SHORT).show();
     }
 
     @Override
