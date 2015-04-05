@@ -3,6 +3,7 @@ package com.example.dmytro.mapalert.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 public class PreferencesUtils {
 
@@ -10,7 +11,7 @@ public class PreferencesUtils {
     private SharedPreferences sharedPref;
 
     // *****************  preferences data *****************
-    private static final String KEY_SHARED_PREF = "ANDROID_MOVIE_LIST";
+    private static final String KEY_SHARED_PREF = "ANDROID_MAP_ALERT";
     private static final int KEY_MODE_PRIVATE = 0;
 
     //  *************** Service ********************
@@ -19,8 +20,8 @@ public class PreferencesUtils {
 
 
     public PreferencesUtils(Context context) {
-        sharedPref = context.getSharedPreferences(KEY_SHARED_PREF,
-                KEY_MODE_PRIVATE);
+        sharedPref = context.getApplicationContext().getSharedPreferences(KEY_SHARED_PREF,
+                Context.MODE_MULTI_PROCESS);
     }
 
     public static PreferencesUtils get(Context c) {

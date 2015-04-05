@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
@@ -58,7 +59,7 @@ import java.util.TreeSet;
 //Я старався повиносити частини коду в інші класи , бо цей вийшов дуже занадто громіздкий
 //ще не чистив код (будуть попадатися зміні які не використовують і т.д.)
 public class LocationActivity extends ActionBarActivity implements OnMapReadyCallback, View.OnClickListener, CompoundButton.OnCheckedChangeListener,
-        TimePicker.OnTimeChangedListener, View.OnFocusChangeListener, GoogleApiClient.ConnectionCallbacks {
+        TimePicker.OnTimeChangedListener, View.OnFocusChangeListener, GoogleApiClient.ConnectionCallbacks, View.OnTouchListener {
 
     private static final String TAG = "LocationActivity";
 
@@ -129,6 +130,8 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         mDescriptionEditText = (EditText) findViewById(R.id.descriptionEditText);
 
         scrollView = (ScrollView) findViewById(R.id.scrollView);
+        scrollView.setOnTouchListener(this);
+
         mRepeatTextView = (TextView) findViewById(R.id.repeatTextView);
 
         mSearchButton = (ImageButton) findViewById(R.id.searchImageButton);
@@ -511,14 +514,19 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     /////--------------------------------Get User Location--------------------------------
 
     public LatLng getUserLocation() {
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-////        Criteria criteria = new Criteria();
-
         final Location location = LocationServices.FusedLocationApi.getLastLocation(mApiClient);
         if (location != null) {
             return new LatLng(location.getLatitude(), location.getLongitude());
         }
         //if location null move camera to London
         return new LatLng(51.50722, -0.12750);
+    }
+
+    //scroll view on touch listener
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        InputMethodManager in = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+         in.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        return false;
     }
 }

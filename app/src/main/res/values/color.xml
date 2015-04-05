@@ -4,4 +4,5 @@
     <color name="positive_button_red">#E53935</color>
     <color name="negative_button_blue">#33b5e5</color>
     <color name="dialog_blue">#03A9F4</color>
+    <color name="grey_50">#FAFAFA</color>
 </resources>

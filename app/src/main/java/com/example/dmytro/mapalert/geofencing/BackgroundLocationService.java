@@ -1,12 +1,8 @@
 package com.example.dmytro.mapalert.geofencing;
 
-import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -32,7 +28,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     public static final String NOTIF_DESCRIPTION_EXTRA = "notification_receiver_description";
     public static final String NOTIF_TITLE_EXTRA = "notification_receiver_title";
 
-    public static final Integer RADIUS_IN_METERS = 50;
+    public static final Integer RADIUS_IN_METERS = 25;
 
     private PreferencesUtils utils;
     private LocationDataSource dataSource;
@@ -43,20 +39,11 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     protected LocationRequest mLocationRequest;
     protected Location mCurrentLocation;
 
-    private AlarmManager alarmManager;
-    private NotificationManager nm;
-    private Intent i;
-
     @Override
     public void onCreate() {
         super.onCreate();
         utils = PreferencesUtils.get(getApplicationContext());
         dataSource = LocationDataSource.get(getApplicationContext());
-
-        alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        i = new Intent(BROADCAST_ACTION);
-
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
@@ -64,9 +51,9 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
                 .build();
 
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(50000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(30 * 1000);  //30 min
+        mLocationRequest.setFastestInterval(5 * 1000); //1.5 min
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
     @Override
@@ -74,7 +61,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         utils.setServiceState(true);
         updateLocationData();
 
-        Log.d(TAG, "SIZE " + locationItems.size());
+        Log.d(TAG, "service started command");
         mGoogleApiClient.connect();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -111,8 +98,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
 
     public Location getUserLocation() {
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
+//        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (location != null) {
             return location;
@@ -128,10 +114,10 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     public void onLocationChanged(Location location) {
         if (utils.isDataChanged()) updateLocationData();
 
-        if (locationItems != null)
-            Log.d(TAG, "SIZE " + locationItems.size());
-        else
-            Log.d(TAG, "LocationItems is null");
+//        if (locationItems != null)   //temp (debug)
+//            Log.d(TAG, "SIZE " + locationItems.size());
+//        else
+//            Log.d(TAG, "LocationItems is null");
 
         checkForBelongingToArea(location, locationItems);
     }
@@ -185,6 +171,6 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             e.printStackTrace();
         }
         utils.setServiceDataChanged(false);
-        //dataSource.close();
+        //dataSource.close();  крешиться в цьому місці
     }
 }
