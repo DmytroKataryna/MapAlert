@@ -5,15 +5,15 @@
 
     <item
         android:id="@+id/track"
-        android:title="Track"
-        android:enabled="false"
-        app:showAsAction="ifRoom" />
+        android:title=""
+        app:showAsAction="ifRoom"
+        app:actionLayout="@layout/custom_textview_menu_layout" />
 
     <item
         android:id="@+id/myswitch"
         android:title=""
         app:showAsAction="always"
-        app:actionLayout="@layout/custom_switch_layout" />
+        app:actionLayout="@layout/custom_switch_menu_layout" />
 
 </menu>
 

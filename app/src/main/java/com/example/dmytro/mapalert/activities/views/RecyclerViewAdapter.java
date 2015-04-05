@@ -137,7 +137,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public void onClick(View v) {
 
             new MaterialDialog.Builder(activity)
-                    .title("Delete Location ?")
+                    .title("Delete Location")
                     .content("Are you sure you want to permanently delete this location?")
                     .positiveText("Delete")
                     .negativeText("Cancel")

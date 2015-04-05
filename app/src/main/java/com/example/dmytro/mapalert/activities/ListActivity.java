@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.TextView;
 
 import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.views.RecyclerViewAdapter;
@@ -39,7 +40,9 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
     private RecyclerView recyclerView;
 
     private FloatingActionButton mAddButton;
+    //menu items
     private SwitchCompat mTrackSwitcher;
+    private TextView mTrackTextView;
 
 
     @Override
@@ -58,8 +61,9 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
             e.printStackTrace();
         }
 
-        recyclerView = (RecyclerView) findViewById(R.id.locationRecycleList);
         mAddButton = (FloatingActionButton) findViewById(R.id.fab_add_location);
+
+        recyclerView = (RecyclerView) findViewById(R.id.locationRecycleList);
         RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, locationItems, mAddButton);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -71,17 +75,15 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
 
         mAddButton.attachToRecyclerView(recyclerView);
 
-        if (locationItems != null)
+        if (!utils.isServiceAlive())
             startService(new Intent(this, BackgroundLocationService.class));
-
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (mTrackSwitcher != null) {
-            mTrackSwitcher.setChecked(utils.isServiceAlive());
+        if (mTrackSwitcher != null) {  //if service is alive set checked to true
+            mTrackSwitcher.setSelected(utils.isServiceAlive());
         }
     }
 
@@ -98,66 +100,32 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
                     mTrackSwitcher.setChecked(utils.isServiceAlive());
                 }
             }
+            if (item.getItemId() == R.id.track) {
+                View view = MenuItemCompat.getActionView(item).findViewById(R.id.textViewForActionBar);
+                if (view != null) {
+                    mTrackTextView = (TextView) view;
+                }
+            }
         }
         return super.onCreateOptionsMenu(menu);
     }
 
-//    @Override
-//    public boolean onPrepareOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.list_location_menu, menu);
-//        for (int i = 0; i < menu.size(); i++) {
-//            MenuItem item = menu.getItem(i);
-//            if (item.getItemId() == R.id.myswitch) {
-//                View view = MenuItemCompat.getActionView(item).findViewById(R.id.switchForActionBar);
-//                if (view != null) {
-//                    mTrackSwitcher = (SwitchCompat) view;
-//                    mTrackSwitcher.setOnCheckedChangeListener(this);
-//                    mTrackSwitcher.setChecked(utils.isServiceAlive());
-//                }
-//            }
-//        }
-//        return super.onPrepareOptionsMenu(menu);
-//    }
-
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-////        startService(new Intent(this, BackgroundLocationService.class)
-////                .putExtra("LocationServiceArray", createDataForService(locationItems)));
-//        switch (item.getItemId()) {
-//            case R.id.myswitch:
-//                SwitchCompat switchCompat = (SwitchCompat) item.getActionView();
-//                if (switchCompat.isChecked()) {
-//                    switchCompat.setChecked(false);
-//                    Toast.makeText(getApplicationContext(), "Cheked", Toast.LENGTH_SHORT).show();
-//                } else {
-//                    switchCompat.setChecked(true);
-//                    Toast.makeText(getApplicationContext(), "UN Cheked", Toast.LENGTH_SHORT).show();
-//                }
-//
-//                return true;
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
-
-//    private ArrayList<LocationServiceItem> createDataForService(List<CursorLocation> locationCursorItems) {
-//        locationItemsForService = new ArrayList<>();
-//        for (CursorLocation location : locationCursorItems) {
-//            locationItemsForService.add(new LocationServiceItem(location.getItem(), false));
-//        }
-//        return locationItemsForService;
-//    }
-
+    //fab listener
     public void addButtonListener(View view) {
         startActivity(new Intent(this, LocationActivity.class));
     }
 
+    //swithcer listener
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
             startService(new Intent(this, BackgroundLocationService.class));
+            mTrackTextView.setTextColor(getResources().getColor(R.color.positive_button_red));
+            utils.setServiceState(true);
         } else {
             stopService(new Intent(this, BackgroundLocationService.class));
+            mTrackTextView.setTextColor(getResources().getColor(R.color.grey_50));
+            utils.setServiceState(false);
         }
     }
-
 }

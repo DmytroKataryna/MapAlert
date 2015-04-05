@@ -1,13 +1,13 @@
 package com.example.dmytro.mapalert.geofencing;
 
-import android.app.NotificationManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.TaskStackBuilder;
 
 import com.example.dmytro.mapalert.R;
@@ -20,14 +20,10 @@ public class NotificationReceiver extends BroadcastReceiver {
 
     protected static final String TAG = "geofence-broadcast";
 
-    private static String title;
-    private static String description;
-
-
     @Override
     public void onReceive(Context context, Intent intent) {
-        title = intent.getStringExtra(BackgroundLocationService.NOTIF_TITLE_EXTRA);
-        description = intent.getStringExtra(BackgroundLocationService.NOTIF_DESCRIPTION_EXTRA);
+        String title = intent.getStringExtra(BackgroundLocationService.NOTIF_TITLE_EXTRA);
+        String description = intent.getStringExtra(BackgroundLocationService.NOTIF_DESCRIPTION_EXTRA);
         sendNotification(context, title, description);
     }
 
@@ -48,29 +44,45 @@ public class NotificationReceiver extends BroadcastReceiver {
         PendingIntent notificationPendingIntent =
                 stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        // Get a notification builder that's compatible with platform versions >= 4
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+        Notification notif = new NotificationCompat.Builder(context)
+                .setContentTitle(notificationTitle)
+                .setContentText(notificationDescription)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setGroup("MapAlert")
+                .setContentIntent(notificationPendingIntent)
+                .addPerson("personMap")
+                .build();
 
-        // Define the notification settings.
-        builder.setSmallIcon(R.mipmap.ic_launcher)
-                // In a real app, you may want to use a library like Volley
-                // to decode the Bitmap.
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
-                        R.mipmap.ic_launcher))
-                .setColor(Color.RED)
-                .setContentTitle(notificationTitle) //title
-                .setContentText(notificationDescription) //description
-                .setContentIntent(notificationPendingIntent);
+        NotificationManagerCompat notificationManager =
+                NotificationManagerCompat.from(context);
+        notificationManager.notify(new Random().nextInt(1000), notif);
 
-        // Dismiss notification once the user touches it.
-        builder.setAutoCancel(true);
+//        // Get a notification builder that's compatible with platform versions >= 4
+//        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+//
+//        // Define the notification settings.
+//        builder.setSmallIcon(R.mipmap.ic_launcher)
+//                // In a real app, you may want to use a library like Volley
+//                // to decode the Bitmap.
+//                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
+//                        R.mipmap.ic_launcher))
+//                .setColor(Color.RED)
+//                .setGroup("MapAlert")
+//                .setGroupSummary(true)
+//                .setContentTitle(notificationTitle) //title
+//                .setContentText(notificationDescription) //description
+//                .setContentIntent(notificationPendingIntent);
+//
+//        // Dismiss notification once the user touches it.
+//        builder.setAutoCancel(true);
 
         // Get an instance of the Notification manager
-        NotificationManager mNotificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-
-        // Issue the notification
-        mNotificationManager.notify(new Random().nextInt(1000), builder.build());
+//        NotificationManager mNotificationManager =
+//                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+//
+//
+//        // Issue the notification
+//        mNotificationManager.notify(new Random().nextInt(1000), notif);
     }
 }
