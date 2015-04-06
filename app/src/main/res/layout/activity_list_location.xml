@@ -8,7 +8,7 @@
         android:id="@+id/locationRecycleList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#BDBDBD" />
+        android:background="#E0E0E0" />
 
     <com.melnykov.fab.FloatingActionButton
         android:id="@+id/fab_add_location"

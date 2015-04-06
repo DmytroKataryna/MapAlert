@@ -1,6 +1,7 @@
 package com.example.dmytro.mapalert.pojo;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.TreeSet;
 
 public class LocationItem implements Serializable {
@@ -8,7 +9,7 @@ public class LocationItem implements Serializable {
     static final long serialVersionUID = 5716885753290653044L;
 
     private String mTitle;
-    private String mDescription;
+    private List<LocationItemAction> mActions;
     private String mImagePath;
 
     private boolean timeSelected;
@@ -18,22 +19,21 @@ public class LocationItem implements Serializable {
     private double latitude;
     private double longitude;
 
-
     public LocationItem() {
     }
 
-    public LocationItem(String mTitle, String mDescription, boolean timeSelected, String imagePath, double latitude, double longitude) {
+    public LocationItem(String mTitle, List<LocationItemAction> mAction, boolean timeSelected, String imagePath, double latitude, double longitude) {
         this.mTitle = mTitle;
-        this.mDescription = mDescription;
+        this.mActions = mAction;
         this.mImagePath = imagePath;
         this.latitude = latitude;
         this.longitude = longitude;
         this.timeSelected = timeSelected;
     }
 
-    public LocationItem(String mTitle, String mDescription, boolean timeSelected, String imagePath, TreeSet<Integer> mRepeat, String mTime, double latitude, double longitude) {
+    public LocationItem(String mTitle, List<LocationItemAction> mAction, boolean timeSelected, String imagePath, TreeSet<Integer> mRepeat, String mTime, double latitude, double longitude) {
         this.mTitle = mTitle;
-        this.mDescription = mDescription;
+        this.mActions = mAction;
         this.mImagePath = imagePath;
         this.mRepeat = mRepeat;
         this.mTime = mTime;
@@ -74,12 +74,12 @@ public class LocationItem implements Serializable {
         this.mTitle = mTitle;
     }
 
-    public String getDescription() {
-        return mDescription;
+    public List<LocationItemAction> getActions() {
+        return mActions;
     }
 
-    public void setDescription(String mDescription) {
-        this.mDescription = mDescription;
+    public void setActions(List<LocationItemAction> mActions) {
+        this.mActions = mActions;
     }
 
     public String getTime() {

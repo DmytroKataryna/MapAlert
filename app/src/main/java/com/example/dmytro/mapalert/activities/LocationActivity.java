@@ -526,7 +526,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         InputMethodManager in = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-         in.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        in.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         return false;
     }
 }

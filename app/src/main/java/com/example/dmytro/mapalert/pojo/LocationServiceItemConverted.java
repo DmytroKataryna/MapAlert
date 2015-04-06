@@ -6,21 +6,26 @@ import java.io.Serializable;
 
 public class LocationServiceItemConverted implements Serializable {
 
+    private Integer dataBaseId;
     private String title;
     private String description;
     private Location location;
     private String mImagePath;
+
     private boolean inside;
 
     public LocationServiceItemConverted() {
     }
 
-    public LocationServiceItemConverted(String title, String description, Location location, String mImagePath, boolean inside) {
+    public LocationServiceItemConverted(Integer dataBaseId, String title, String description, Location location, String mImagePath, Integer inside) {
+        this.dataBaseId = dataBaseId;
         this.title = title;
         this.description = description;
         this.location = location;
         this.mImagePath = mImagePath;
-        this.inside = inside;
+
+        //if inside equals 1 than true in all other situation false
+        this.inside = inside.equals(1);
     }
 
     public Location getLocation() {
@@ -61,5 +66,13 @@ public class LocationServiceItemConverted implements Serializable {
 
     public void setImagePath(String mImagePath) {
         this.mImagePath = mImagePath;
+    }
+
+    public Integer getDataBaseId() {
+        return dataBaseId;
+    }
+
+    public void setDataBaseId(Integer dataBaseId) {
+        this.dataBaseId = dataBaseId;
     }
 }

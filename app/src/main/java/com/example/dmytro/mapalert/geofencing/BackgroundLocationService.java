@@ -135,7 +135,9 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             //send notification that user enter area
             if (distance < RADIUS_IN_METERS && !location.isInside()) {
                 location.setInside(true);
+                updateInsideStatus(location.getDataBaseId(), true);
                 sendBroadcast(new Intent(BROADCAST_ACTION)
+
                         .putExtra(NOTIF_TITLE_EXTRA, "Entered " + location.getTitle() + " area")
                         .putExtra(NOTIF_DESCRIPTION_EXTRA, location.getDescription())
                         .putExtra(NOTIF_IMAGE_PATH_EXTRA, location.getImagePath()));
@@ -143,6 +145,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             //send notification that user leave area
             if (distance > RADIUS_IN_METERS && location.isInside()) {
                 location.setInside(false);
+                updateInsideStatus(location.getDataBaseId(), false);
+
                 sendBroadcast(new Intent(BROADCAST_ACTION)
                         .putExtra(NOTIF_TITLE_EXTRA, "Exited " + location.getTitle() + " area")
                         .putExtra(NOTIF_DESCRIPTION_EXTRA, location.getDescription())
@@ -158,11 +162,12 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             loc.setLatitude(location.getItem().getLatitude());
             loc.setLongitude(location.getItem().getLongitude());
             result.add(new LocationServiceItemConverted(
+                    location.getId(),
                     location.getItem().getTitle(),
                     location.getItem().getDescription(),
                     loc,
                     location.getItem().getImagePath(),
-                    false));   //false isn't best idea, because user could be inSide so user will receiver additional notification . Solution is save boolean to DB
+                    location.getInside()));
         }
         return result;
     }
@@ -182,6 +187,19 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             e.printStackTrace();
         }
         utils.setServiceDataChanged(false);
+
+        //dataSource.close();  крешиться в цьому місці
+    }
+
+    public void updateInsideStatus(Integer id, boolean inside) {
+        dataSource.open();
+
+        Integer insideInt;
+        if (inside) insideInt = 1;
+        else insideInt = 0;
+        //get Data from DB
+        dataSource.updateInsideStatus(id, insideInt);
+
         //dataSource.close();  крешиться в цьому місці
     }
 }
