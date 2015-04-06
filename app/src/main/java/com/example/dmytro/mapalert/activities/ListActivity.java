@@ -115,7 +115,7 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
         startActivity(new Intent(this, LocationActivity.class));
     }
 
-    //swithcer listener
+    //switcher listener
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {

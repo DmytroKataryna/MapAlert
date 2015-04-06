@@ -6,6 +6,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationServiceItemConverted;
@@ -27,6 +28,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     public static final String BROADCAST_ACTION = "com.example.mapalert.location.receiver";
     public static final String NOTIF_DESCRIPTION_EXTRA = "notification_receiver_description";
     public static final String NOTIF_TITLE_EXTRA = "notification_receiver_title";
+    public static final String NOTIF_IMAGE_PATH_EXTRA = "notification_receiver_image_path";
 
     public static final Integer RADIUS_IN_METERS = 25;
 
@@ -51,8 +53,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
                 .build();
 
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(30 * 1000);  //30 min
-        mLocationRequest.setFastestInterval(5 * 1000); //1.5 min
+        mLocationRequest.setInterval(30 * 1000);  //30 sec (just for test ) it should be 2 min
+        mLocationRequest.setFastestInterval(5 * 1000); //5 sec (just for test ) it should be 1.5 min
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
@@ -128,19 +130,23 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         for (LocationServiceItemConverted location : listOfLocations) {
             float distance = userCurrentLocation.distanceTo(location.getLocation());
 
+            Toast.makeText(getApplicationContext(), "DIS " + distance, Toast.LENGTH_SHORT).show();
+
             //send notification that user enter area
             if (distance < RADIUS_IN_METERS && !location.isInside()) {
                 location.setInside(true);
                 sendBroadcast(new Intent(BROADCAST_ACTION)
                         .putExtra(NOTIF_TITLE_EXTRA, "Entered " + location.getTitle() + " area")
-                        .putExtra(NOTIF_DESCRIPTION_EXTRA, location.getDescription()));
+                        .putExtra(NOTIF_DESCRIPTION_EXTRA, location.getDescription())
+                        .putExtra(NOTIF_IMAGE_PATH_EXTRA, location.getImagePath()));
             }
             //send notification that user leave area
             if (distance > RADIUS_IN_METERS && location.isInside()) {
                 location.setInside(false);
                 sendBroadcast(new Intent(BROADCAST_ACTION)
                         .putExtra(NOTIF_TITLE_EXTRA, "Exited " + location.getTitle() + " area")
-                        .putExtra(NOTIF_DESCRIPTION_EXTRA, location.getDescription()));
+                        .putExtra(NOTIF_DESCRIPTION_EXTRA, location.getDescription())
+                        .putExtra(NOTIF_IMAGE_PATH_EXTRA, location.getImagePath()));
             }
         }
     }
@@ -151,7 +157,12 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             Location loc = new Location("provider");
             loc.setLatitude(location.getItem().getLatitude());
             loc.setLongitude(location.getItem().getLongitude());
-            result.add(new LocationServiceItemConverted(location.getItem().getTitle(), location.getItem().getDescription(), loc, false));   //false isn't best idea, because user could be inSide so user will receiver additional notification
+            result.add(new LocationServiceItemConverted(
+                    location.getItem().getTitle(),
+                    location.getItem().getDescription(),
+                    loc,
+                    location.getItem().getImagePath(),
+                    false));   //false isn't best idea, because user could be inSide so user will receiver additional notification . Solution is save boolean to DB
         }
         return result;
     }
