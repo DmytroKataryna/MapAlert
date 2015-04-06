@@ -164,7 +164,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             result.add(new LocationServiceItemConverted(
                     location.getId(),
                     location.getItem().getTitle(),
-                    location.getItem().getDescription(),
+                    "DESCRIPTION",
                     loc,
                     location.getItem().getImagePath(),
                     location.getInside()));

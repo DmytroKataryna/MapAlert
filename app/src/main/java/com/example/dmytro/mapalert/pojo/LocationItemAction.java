@@ -5,14 +5,16 @@ import java.io.Serializable;
 public class LocationItemAction implements Serializable {
 
     private String actionText;
-    private boolean state;
+    private boolean done;
 
     public LocationItemAction() {
+        this.actionText = "";
+        this.done = false;
     }
 
     public LocationItemAction(String actionText, boolean state) {
         this.actionText = actionText;
-        this.state = state;
+        this.done = state;
     }
 
     public String getActionText() {
@@ -23,11 +25,11 @@ public class LocationItemAction implements Serializable {
         this.actionText = actionText;
     }
 
-    public boolean isState() {
-        return state;
+    public boolean isDone() {
+        return done;
     }
 
-    public void setState(boolean state) {
-        this.state = state;
+    public void setDone(boolean done) {
+        this.done = done;
     }
 }

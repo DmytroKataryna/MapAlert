@@ -8,10 +8,12 @@ import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.Gravity;
@@ -34,10 +36,12 @@ import android.widget.Toast;
 import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.views.CustomMapFragment;
 import com.example.dmytro.mapalert.activities.views.PhotoDialog;
+import com.example.dmytro.mapalert.activities.views.RecyclerViewActionAdapter;
 import com.example.dmytro.mapalert.activities.views.RecyclerViewAdapter;
 import com.example.dmytro.mapalert.activities.views.RepeatDialog;
 import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationItem;
+import com.example.dmytro.mapalert.pojo.LocationItemAction;
 import com.example.dmytro.mapalert.utils.ImageUtil;
 import com.example.dmytro.mapalert.utils.LocationDataSource;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -52,6 +56,7 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
@@ -65,7 +70,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
     private static Integer dataBaseId;
     private GoogleApiClient mApiClient;
-
 
     //Image intent constants
     private static final int SELECT_FILE = 1111;
@@ -90,7 +94,8 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
     //Location object
     private LocationItem loc;
-    private String mTitle, mDescription;
+    private String mTitle;
+    private List<LocationItemAction> mActions;
     private double latitude;
     private double longitude;
     private boolean mTimeSelected;
@@ -103,6 +108,9 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     //dialog items
     private TreeSet<Integer> selectedItems = new TreeSet<>();
     private boolean checkedDialogItems[] = new boolean[7];
+
+    //action recycler view
+    private List<LocationItemAction> locationItemActions;
 
 
     @Override
@@ -127,7 +135,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         mTitleEditText = (EditText) findViewById(R.id.titleEditText);
         mTitleEditText.setOnFocusChangeListener(this);
 
-        mDescriptionEditText = (EditText) findViewById(R.id.descriptionEditText);
+        //mDescriptionEditText = (EditText) findViewById(R.id.descriptionEditText);
 
         scrollView = (ScrollView) findViewById(R.id.scrollView);
         scrollView.setOnTouchListener(this);
@@ -146,6 +154,21 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         mLocPhoto = (ImageView) findViewById(R.id.locationImageView);
         mLocPhoto.setOnClickListener(this);
 
+        locationItemActions = new ArrayList<>();
+       // if (locationItemActions.isEmpty())
+            locationItemActions.add(new LocationItemAction());
+
+        //load list action from DB , also when press DONE get data from list and save to DB
+
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.locationActionRecycleList);
+        RecyclerViewActionAdapter adapter = new RecyclerViewActionAdapter(this, locationItemActions);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
+
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(itemAnimator);
+
         mapFragment = (CustomMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
@@ -156,11 +179,9 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
         mApiClient.connect();
 
-
         //start edit mode (restore data )
         if (getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false))
             restoreData();
-
     }
 
     //------------------------------------------------- RESTORE DATA (location object from DB )---------------------
@@ -168,7 +189,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         loc = ((CursorLocation) getIntent().getSerializableExtra(RecyclerViewAdapter.ITEM_KEY)).getItem();
         dataBaseId = ((CursorLocation) getIntent().getSerializableExtra(RecyclerViewAdapter.ITEM_KEY)).getId();
         mTitleEditText.setText(loc.getTitle());
-        mDescriptionEditText.setText(loc.getDescription());
+        mDescriptionEditText.setText(""); //loc.getActions() and set data to list
         imagePath = loc.getImagePath();  // get image path from db
 
         Picasso.with(getApplicationContext()).load(new File(imagePath))
@@ -319,9 +340,9 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                     imagePath = "drawable://" + R.drawable.ic_image_camera;
 
                 if (mTimeSelected) { //depends on time switcher selection , it is saved different object
-                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);
+                    loc = new LocationItem(mTitle, null, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);     // get data from recycler view and save list actions to db
                 } else {
-                    loc = new LocationItem(mTitle, mDescription, mTimeSelected, imagePath, latitude, longitude);
+                    loc = new LocationItem(mTitle, null, mTimeSelected, imagePath, latitude, longitude);  // get data from recycler view and save list actions to db
                 }
 
 
@@ -344,7 +365,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     //check Title field and save location to  DB just if title isn't empty
     private boolean checkIfAvailableToLogin() {
         mTitle = mTitleEditText.getText().toString();
-        mDescription = mDescriptionEditText.getText().toString();
+
         if (mTitle == null || mTitle.length() < 1) {
             mTitleEditText.setBackgroundResource(R.drawable.text_view_red_background);
             Toast toast = Toast.makeText(this, "This field is required", Toast.LENGTH_SHORT);
