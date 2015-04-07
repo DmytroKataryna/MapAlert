@@ -11,12 +11,16 @@
         android:weightSum="10">
 
 
-        <EditText
+        <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="8"
-            android:id="@+id/actionEditText"
-            android:hint="Enter action ..." />
+            android:textSize="18sp"
+            android:textColor="@color/negative_button_blue"
+            android:paddingLeft="10dp"
+            android:id="@+id/actionTextView"
+            android:hint="Action ..."
+            android:gravity="center_vertical" />
 
         <CheckBox
             android:layout_width="0dp"

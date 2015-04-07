@@ -2,11 +2,13 @@ package com.example.dmytro.mapalert.activities.views;
 
 
 import android.app.Activity;
+import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,6 +17,7 @@ import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.pojo.LocationItemAction;
 
 import java.util.List;
+
 
 public class RecyclerViewActionAdapter extends RecyclerView.Adapter<RecyclerViewActionAdapter.ViewHolder> {
 
@@ -35,11 +38,27 @@ public class RecyclerViewActionAdapter extends RecyclerView.Adapter<RecyclerView
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        LocationItemAction locationItemAction = items.get(position);
+    public void onBindViewHolder(final ViewHolder holder, int position) {
+        final LocationItemAction locationItemAction = items.get(position);
 
         holder.action.setText(locationItemAction.getActionText());
+
         holder.actionCheckBox.setChecked(locationItemAction.isDone());
+        holder.actionCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (locationItemAction.isDone()) {
+                    locationItemAction.setDone(false);
+                    holder.actionCheckBox.setChecked(false);
+                } else {
+                    locationItemAction.setDone(true);
+                    holder.actionCheckBox.setChecked(true);
+                }
+
+                notifyDataSetChanged();
+            }
+        });
+        // holder.checkedChangeListener.setAction(locationItemAction);
         holder.deleteButtonListener.setAction(locationItemAction);
     }
 
@@ -54,12 +73,16 @@ public class RecyclerViewActionAdapter extends RecyclerView.Adapter<RecyclerView
         private CheckBox actionCheckBox;
         private ImageButton deleteButton;
         private DeleteButtonListener deleteButtonListener;
+        private CheckedChangeListener checkedChangeListener;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
-            action = (TextView) itemView.findViewById(R.id.actionEditText);
+            action = (TextView) itemView.findViewById(R.id.actionTextView);
+
             actionCheckBox = (CheckBox) itemView.findViewById(R.id.actionCheckBox);
+            //checkedChangeListener = new CheckedChangeListener();
+            // actionCheckBox.setOnCheckedChangeListener(checkedChangeListener);
 
             deleteButton = (ImageButton) itemView.findViewById(R.id.deleteActionImageButton);
             deleteButtonListener = new DeleteButtonListener();
@@ -80,8 +103,29 @@ public class RecyclerViewActionAdapter extends RecyclerView.Adapter<RecyclerView
         }
     }
 
+    private class CheckedChangeListener implements CompoundButton.OnCheckedChangeListener {
+        private LocationItemAction action;
+
+        public void setAction(LocationItemAction action) {
+            this.action = action;
+        }
+
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+            action.setDone(isChecked);
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    notifyDataSetChanged();
+                }
+            });
+
+        }
+    }
+
     private void delete(LocationItemAction action) {
-        Toast.makeText(activity, "TXT " + action.getActionText(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(activity, "TXT " + action.getActionText(), Toast.LENGTH_SHORT).show();
         int position = items.indexOf(action);
         items.remove(position);
         recyclerView.getLayoutParams().height -= 100;

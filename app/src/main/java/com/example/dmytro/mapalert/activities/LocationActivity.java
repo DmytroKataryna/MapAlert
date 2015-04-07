@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.views.CustomMapFragment;
 import com.example.dmytro.mapalert.activities.views.PhotoDialog;
@@ -157,8 +158,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         mLocPhoto.setOnClickListener(this);
 
         locationItemActions = new ArrayList<>();
-        // if (locationItemActions.isEmpty())
-        locationItemActions.add(new LocationItemAction());
 
         //load list action from DB , also when press DONE get data from list and save to DB
 
@@ -170,7 +169,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(itemAnimator);
-        recyclerView.getLayoutParams().height = 100;
 
 
         mapFragment = (CustomMapFragment) getSupportFragmentManager()
@@ -557,9 +555,32 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
     /////--------------------------------Add Action Button Listener--------------------------------
     public void addAction(View view) {
-        int position = locationItemActions.size();
-        locationItemActions.add(position, new LocationItemAction());
-        recyclerView.getLayoutParams().height += 100;
-        adapter.notifyItemInserted(position);
+
+        new MaterialDialog.Builder(this)
+                .title("Create Location Action")
+                .customView(R.layout.action_dialog_custom_view, false)
+                .positiveText("Create")
+                .negativeText("Cancel")
+                .positiveColorRes(R.color.positive_button_red)
+                .negativeColorRes(R.color.negative_button_blue)
+                .titleColorRes(R.color.dialog_blue)
+                .callback(new MaterialDialog.ButtonCallback() {
+                    @Override
+                    public void onPositive(MaterialDialog dialog) {
+                        String result = ((EditText) dialog.getCustomView().findViewById(R.id.actionDialogEditText)).getText().toString();
+                        int position = locationItemActions.size();
+                        locationItemActions.add(position, new LocationItemAction(result, false));
+                        recyclerView.getLayoutParams().height += 100;
+                        adapter.notifyItemInserted(position);
+                        checkCheckedItems();
+                    }
+                })
+                .show();
+    }
+
+    public void checkCheckedItems() {
+        for (LocationItemAction item : locationItemActions) {
+            Log.d("ZASXZA", "TEXT " + item.getActionText() + " checked " + item.isDone());
+        }
     }
 }
