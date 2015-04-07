@@ -158,9 +158,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         mLocPhoto.setOnClickListener(this);
 
         locationItemActions = new ArrayList<>();
-
-        //load list action from DB , also when press DONE get data from list and save to DB
-
         recyclerView = (RecyclerView) findViewById(R.id.locationActionRecycleList);
         adapter = new RecyclerViewActionAdapter(this, locationItemActions, recyclerView);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -191,9 +188,12 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         loc = ((CursorLocation) getIntent().getSerializableExtra(RecyclerViewAdapter.ITEM_KEY)).getItem();
         dataBaseId = ((CursorLocation) getIntent().getSerializableExtra(RecyclerViewAdapter.ITEM_KEY)).getId();
         mTitleEditText.setText(loc.getTitle());
-        mDescriptionEditText.setText(""); //loc.getActions() and set data to list
-        imagePath = loc.getImagePath();  // get image path from db
 
+        locationItemActions.addAll(loc.getActions());
+        changeRecyclerViewLayoutParams(locationItemActions, recyclerView);
+        adapter.notifyDataSetChanged();
+
+        imagePath = loc.getImagePath();  // get image path from db
         Picasso.with(getApplicationContext()).load(new File(imagePath))
                 .placeholder(R.drawable.ic_image_camera)
                 .into(mLocPhoto);
@@ -342,9 +342,9 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                     imagePath = "drawable://" + R.drawable.ic_image_camera;
 
                 if (mTimeSelected) { //depends on time switcher selection , it is saved different object
-                    loc = new LocationItem(mTitle, null, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);     // get data from recycler view and save list actions to db
+                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);     // get data from recycler view and save list actions to db
                 } else {
-                    loc = new LocationItem(mTitle, null, mTimeSelected, imagePath, latitude, longitude);  // get data from recycler view and save list actions to db
+                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, latitude, longitude);  // get data from recycler view and save list actions to db
                 }
 
 
@@ -572,15 +572,14 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                         locationItemActions.add(position, new LocationItemAction(result, false));
                         recyclerView.getLayoutParams().height += 100;
                         adapter.notifyItemInserted(position);
-                        checkCheckedItems();
                     }
                 })
                 .show();
     }
 
-    public void checkCheckedItems() {
-        for (LocationItemAction item : locationItemActions) {
-            Log.d("ZASXZA", "TEXT " + item.getActionText() + " checked " + item.isDone());
-        }
+    //--------------------------------Change Recycler View Height (depend on list size)--------------------------------
+    private void changeRecyclerViewLayoutParams(List<LocationItemAction> locationItemActions, RecyclerView recyclerView) {
+        int size = locationItemActions.size();
+        recyclerView.getLayoutParams().height = size * 100;
     }
 }
