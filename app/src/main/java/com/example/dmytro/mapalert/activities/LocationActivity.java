@@ -111,6 +111,8 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
     //action recycler view
     private List<LocationItemAction> locationItemActions;
+    private RecyclerView recyclerView;
+    private RecyclerViewActionAdapter adapter;
 
 
     @Override
@@ -155,19 +157,21 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         mLocPhoto.setOnClickListener(this);
 
         locationItemActions = new ArrayList<>();
-       // if (locationItemActions.isEmpty())
-            locationItemActions.add(new LocationItemAction());
+        // if (locationItemActions.isEmpty())
+        locationItemActions.add(new LocationItemAction());
 
         //load list action from DB , also when press DONE get data from list and save to DB
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.locationActionRecycleList);
-        RecyclerViewActionAdapter adapter = new RecyclerViewActionAdapter(this, locationItemActions);
+        recyclerView = (RecyclerView) findViewById(R.id.locationActionRecycleList);
+        adapter = new RecyclerViewActionAdapter(this, locationItemActions, recyclerView);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
 
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(itemAnimator);
+        recyclerView.getLayoutParams().height = 100;
+
 
         mapFragment = (CustomMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -549,5 +553,13 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         InputMethodManager in = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         in.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         return false;
+    }
+
+    /////--------------------------------Add Action Button Listener--------------------------------
+    public void addAction(View view) {
+        int position = locationItemActions.size();
+        locationItemActions.add(position, new LocationItemAction());
+        recyclerView.getLayoutParams().height += 100;
+        adapter.notifyItemInserted(position);
     }
 }

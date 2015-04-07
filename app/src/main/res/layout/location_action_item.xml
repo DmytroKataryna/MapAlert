@@ -11,12 +11,6 @@
         android:weightSum="10">
 
 
-        <CheckBox
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:id="@+id/actionCheckBox"
-            android:checked="false" />
-
         <EditText
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -24,13 +18,12 @@
             android:id="@+id/actionEditText"
             android:hint="Enter action ..." />
 
-        <ImageButton
+        <CheckBox
             android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="match_parent"
-            android:id="@+id/addActionImageButton"
-            android:src="@drawable/ic_content_add"
-            android:background="@color/dialog_blue"
-            android:layout_weight="1" />
+            android:id="@+id/actionCheckBox"
+            android:checked="false" />
 
         <ImageButton
             android:layout_width="0dp"

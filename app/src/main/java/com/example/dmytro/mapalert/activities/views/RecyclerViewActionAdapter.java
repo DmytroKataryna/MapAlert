@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.pojo.LocationItemAction;
@@ -18,11 +19,13 @@ import java.util.List;
 public class RecyclerViewActionAdapter extends RecyclerView.Adapter<RecyclerViewActionAdapter.ViewHolder> {
 
     private Activity activity;
+    private RecyclerView recyclerView;
     private List<LocationItemAction> items;
 
-    public RecyclerViewActionAdapter(Activity activity, List<LocationItemAction> items) {
+    public RecyclerViewActionAdapter(Activity activity, List<LocationItemAction> items, RecyclerView recyclerView) {
         this.activity = activity;
         this.items = items;
+        this.recyclerView = recyclerView;
     }
 
     @Override
@@ -38,7 +41,6 @@ public class RecyclerViewActionAdapter extends RecyclerView.Adapter<RecyclerView
         holder.action.setText(locationItemAction.getActionText());
         holder.actionCheckBox.setChecked(locationItemAction.isDone());
         holder.deleteButtonListener.setAction(locationItemAction);
-        holder.addButtonListener.setCreateAction(locationItemAction);
     }
 
     @Override
@@ -50,9 +52,8 @@ public class RecyclerViewActionAdapter extends RecyclerView.Adapter<RecyclerView
 
         private TextView action;
         private CheckBox actionCheckBox;
-        private ImageButton deleteButton, addButton;
+        private ImageButton deleteButton;
         private DeleteButtonListener deleteButtonListener;
-        private AddButtonListener addButtonListener;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -63,23 +64,6 @@ public class RecyclerViewActionAdapter extends RecyclerView.Adapter<RecyclerView
             deleteButton = (ImageButton) itemView.findViewById(R.id.deleteActionImageButton);
             deleteButtonListener = new DeleteButtonListener();
             deleteButton.setOnClickListener(deleteButtonListener);
-
-            addButton = (ImageButton) itemView.findViewById(R.id.addActionImageButton);
-            addButtonListener = new AddButtonListener();
-            addButton.setOnClickListener(addButtonListener);
-        }
-    }
-
-    private class AddButtonListener implements View.OnClickListener {
-        private LocationItemAction item;
-
-        @Override
-        public void onClick(View v) {
-            create();
-        }
-
-        public void setCreateAction(LocationItemAction action) {
-            this.item = action;
         }
     }
 
@@ -97,17 +81,10 @@ public class RecyclerViewActionAdapter extends RecyclerView.Adapter<RecyclerView
     }
 
     private void delete(LocationItemAction action) {
+        Toast.makeText(activity, "TXT " + action.getActionText(), Toast.LENGTH_SHORT).show();
         int position = items.indexOf(action);
         items.remove(position);
+        recyclerView.getLayoutParams().height -= 100;
         notifyItemRemoved(position);
-    }
-
-    private void create() {
-//        items.add(new LocationItemAction());
-//        notifyItemInserted(items.size());
-
-        int position = items.size();
-        items.add(position , new LocationItemAction("TXTX", false));
-        notifyItemInserted(position );
     }
 }
