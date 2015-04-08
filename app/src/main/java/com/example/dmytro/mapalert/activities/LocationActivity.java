@@ -563,6 +563,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                 .negativeText("Cancel")
                 .positiveColorRes(R.color.positive_button_red)
                 .negativeColorRes(R.color.negative_button_blue)
+                .cancelable(false)
                 .titleColorRes(R.color.dialog_blue)
                 .callback(new MaterialDialog.ButtonCallback() {
                     @Override

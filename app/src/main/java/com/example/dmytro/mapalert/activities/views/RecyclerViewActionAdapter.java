@@ -112,7 +112,7 @@ public class RecyclerViewActionAdapter extends RecyclerView.Adapter<RecyclerView
 
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
+            //this part of the code isn't used
             action.setDone(isChecked);
             new Handler().post(new Runnable() {
                 @Override

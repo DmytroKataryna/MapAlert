@@ -2,6 +2,8 @@ package com.example.dmytro.mapalert.activities.views;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -55,10 +58,18 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         LocationItem locationItem = items.get(i).getItem();
 
         viewHolder.title.setText(trimText(locationItem.getTitle()));
-        viewHolder.description.setText("ADAPTER LIST");  //it should be ListView.setAdapter(adapter)
+        //viewHolder.description.setText("ADAPTER LIST");  //it should be ListView.setAdapter(adapter)
         viewHolder.editButtonListener.setLocation(items.get(i));
         viewHolder.deleteButtonListener.setLocation(items.get(i));
         //viewHolder.layoutListener.setLocation(items.get(i));
+
+//        LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
+//        RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
+//        viewHolder.recyclerView.setAdapter(new RecyclerViewActionAdapterForListActivity(activity, locationItem.getActions()));
+//        viewHolder.recyclerView.setLayoutManager(layoutManager);
+//        viewHolder.recyclerView.setItemAnimator(itemAnimator);
+        RecyclerViewActionAdapterForListActivity adapter = new RecyclerViewActionAdapterForListActivity(activity, locationItem.getActions());
+        viewHolder.listView.setAdapter(adapter);
 
         Picasso.with(activity).load(new File(locationItem.getImagePath()))
                 .placeholder(R.drawable.ic_image_camera)
@@ -88,8 +99,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private LinearLayout itemLayout;
 //        private ItemLayoutListener layoutListener;
 
-        private TextView title, description;
-        //private List View or RecyclerView
+        private TextView title;
+        private ListView listView;
         private ImageView photo;
 
         private ImageButton deleteButton, editButton;
@@ -104,7 +115,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //            itemLayout.setOnClickListener(layoutListener);
 
             title = (TextView) itemView.findViewById(R.id.titleItemTextView);
-            description = (TextView) itemView.findViewById(R.id.descItemTextView);
+            listView = (ListView) itemView.findViewById(R.id.listLocationActionListView);
             photo = (ImageView) itemView.findViewById(R.id.locPhotoView);
             deleteButton = (ImageButton) itemView.findViewById(R.id.deleteItemButton);
             deleteButtonListener = new DeleteButtonListener();
