@@ -7,13 +7,15 @@ public class CursorLocation implements Serializable {
 
     private Integer id;
     private LocationItem item;
+    private Integer inside;
 
     public CursorLocation() {
     }
 
-    public CursorLocation(Integer id, LocationItem item) {
+    public CursorLocation(Integer id, LocationItem item, Integer inside) {
         this.id = id;
         this.item = item;
+        this.inside = inside;
     }
 
     public Integer getId() {
@@ -30,5 +32,13 @@ public class CursorLocation implements Serializable {
 
     public void setItem(LocationItem item) {
         this.item = item;
+    }
+
+    public Integer getInside() {
+        return inside;
+    }
+
+    public void setInside(Integer inside) {
+        this.inside = inside;
     }
 }

@@ -3,7 +3,7 @@
     android:layout_gravity="center"
     android:id="@+id/card_view"
     android:layout_width="match_parent"
-    android:layout_height="105dp"
+    android:layout_height="109dp"
     card_view:cardCornerRadius="4dp"
     android:layout_marginTop="7dp"
     android:layout_marginLeft="7dp"
@@ -44,16 +44,15 @@
         <com.makeramen.roundedimageview.RoundedImageView xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_weight="2"
             android:layout_width="0dp"
-            android:layout_height="100dp"
+            android:layout_height="96dp"
             android:id="@+id/locPhotoView"
             android:src="@drawable/ic_image_camera"
             android:scaleType="fitCenter"
-            android:layout_gravity="end"
+            android:layout_gravity="center"
 
-            android:paddingTop="8dp"
             app:riv_corner_radius="30dip"
             app:riv_mutate_background="true"
-            android:layout_marginTop="6dp" />
+            android:paddingBottom="2dp" />
 
         <LinearLayout
             android:orientation="vertical"

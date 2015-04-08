@@ -18,13 +18,11 @@ import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.views.RecyclerViewAdapter;
 import com.example.dmytro.mapalert.geofencing.BackgroundLocationService;
 import com.example.dmytro.mapalert.pojo.CursorLocation;
-import com.example.dmytro.mapalert.pojo.LocationServiceItem;
 import com.example.dmytro.mapalert.utils.LocationDataSource;
 import com.example.dmytro.mapalert.utils.PreferencesUtils;
 import com.melnykov.fab.FloatingActionButton;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 //here i will place list of locations
@@ -36,7 +34,6 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
     private PreferencesUtils utils;
     private LocationDataSource dataSource;
     private List<CursorLocation> locationItems;
-    private ArrayList<LocationServiceItem> locationItemsForService;
     private RecyclerView recyclerView;
 
     private FloatingActionButton mAddButton;
@@ -115,7 +112,7 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
         startActivity(new Intent(this, LocationActivity.class));
     }
 
-    //swithcer listener
+    //switcher listener
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {

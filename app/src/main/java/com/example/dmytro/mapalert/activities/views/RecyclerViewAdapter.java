@@ -55,7 +55,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         LocationItem locationItem = items.get(i).getItem();
 
         viewHolder.title.setText(trimText(locationItem.getTitle()));
-        viewHolder.description.setText(trimText(locationItem.getDescription()));
+        viewHolder.description.setText("ADAPTER LIST");  //it should be ListView.setAdapter(adapter)
         viewHolder.editButtonListener.setLocation(items.get(i));
         viewHolder.deleteButtonListener.setLocation(items.get(i));
         //viewHolder.layoutListener.setLocation(items.get(i));
@@ -89,6 +89,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //        private ItemLayoutListener layoutListener;
 
         private TextView title, description;
+        //private List View or RecyclerView
         private ImageView photo;
 
         private ImageButton deleteButton, editButton;

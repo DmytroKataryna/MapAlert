@@ -11,11 +11,12 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_TABLE = "locationtb";
     public static final String ID_COLUMN = "_id";
     public static final String LOCATION_COLUMN = "location";
+    public static final String LOCATION_INSIDE_COLUMN = "inside";
 
     private static final String DATABASE_CREATE_SCRIPT = "create table "
-            + DATABASE_TABLE + " (" + ID_COLUMN
-            + " integer primary key autoincrement, " + LOCATION_COLUMN
-            + " BLOB not null);";
+            + DATABASE_TABLE + " (" + ID_COLUMN + " integer primary key autoincrement, "
+            + LOCATION_COLUMN + " BLOB not null, "
+            + LOCATION_INSIDE_COLUMN + " integer default 0);";
 
 
     public DBHelper(Context context) {

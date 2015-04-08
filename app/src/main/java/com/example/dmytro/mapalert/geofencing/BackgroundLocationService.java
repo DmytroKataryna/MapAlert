@@ -6,6 +6,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationServiceItemConverted;
@@ -27,6 +28,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     public static final String BROADCAST_ACTION = "com.example.mapalert.location.receiver";
     public static final String NOTIF_DESCRIPTION_EXTRA = "notification_receiver_description";
     public static final String NOTIF_TITLE_EXTRA = "notification_receiver_title";
+    public static final String NOTIF_IMAGE_PATH_EXTRA = "notification_receiver_image_path";
 
     public static final Integer RADIUS_IN_METERS = 25;
 
@@ -51,8 +53,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
                 .build();
 
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(30 * 1000);  //30 min
-        mLocationRequest.setFastestInterval(5 * 1000); //1.5 min
+        mLocationRequest.setInterval(30 * 1000);  //30 sec (just for test ) it should be 2 min
+        mLocationRequest.setFastestInterval(5 * 1000); //5 sec (just for test ) it should be 1.5 min
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
@@ -128,19 +130,27 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         for (LocationServiceItemConverted location : listOfLocations) {
             float distance = userCurrentLocation.distanceTo(location.getLocation());
 
+            Toast.makeText(getApplicationContext(), "DIS " + distance, Toast.LENGTH_SHORT).show();
+
             //send notification that user enter area
             if (distance < RADIUS_IN_METERS && !location.isInside()) {
                 location.setInside(true);
+                updateInsideStatus(location.getDataBaseId(), true);
                 sendBroadcast(new Intent(BROADCAST_ACTION)
+
                         .putExtra(NOTIF_TITLE_EXTRA, "Entered " + location.getTitle() + " area")
-                        .putExtra(NOTIF_DESCRIPTION_EXTRA, location.getDescription()));
+                        .putExtra(NOTIF_DESCRIPTION_EXTRA, location.getDescription())
+                        .putExtra(NOTIF_IMAGE_PATH_EXTRA, location.getImagePath()));
             }
             //send notification that user leave area
             if (distance > RADIUS_IN_METERS && location.isInside()) {
                 location.setInside(false);
+                updateInsideStatus(location.getDataBaseId(), false);
+
                 sendBroadcast(new Intent(BROADCAST_ACTION)
                         .putExtra(NOTIF_TITLE_EXTRA, "Exited " + location.getTitle() + " area")
-                        .putExtra(NOTIF_DESCRIPTION_EXTRA, location.getDescription()));
+                        .putExtra(NOTIF_DESCRIPTION_EXTRA, location.getDescription())
+                        .putExtra(NOTIF_IMAGE_PATH_EXTRA, location.getImagePath()));
             }
         }
     }
@@ -151,7 +161,13 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             Location loc = new Location("provider");
             loc.setLatitude(location.getItem().getLatitude());
             loc.setLongitude(location.getItem().getLongitude());
-            result.add(new LocationServiceItemConverted(location.getItem().getTitle(), location.getItem().getDescription(), loc, false));   //false isn't best idea, because user could be inSide so user will receiver additional notification
+            result.add(new LocationServiceItemConverted(
+                    location.getId(),
+                    location.getItem().getTitle(),
+                    "DESCRIPTION",
+                    loc,
+                    location.getItem().getImagePath(),
+                    location.getInside()));
         }
         return result;
     }
@@ -171,6 +187,19 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             e.printStackTrace();
         }
         utils.setServiceDataChanged(false);
+
+        //dataSource.close();  крешиться в цьому місці
+    }
+
+    public void updateInsideStatus(Integer id, boolean inside) {
+        dataSource.open();
+
+        Integer insideInt;
+        if (inside) insideInt = 1;
+        else insideInt = 0;
+        //get Data from DB
+        dataSource.updateInsideStatus(id, insideInt);
+
         //dataSource.close();  крешиться в цьому місці
     }
 }

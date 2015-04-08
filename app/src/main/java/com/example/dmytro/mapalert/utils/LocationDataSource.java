@@ -21,7 +21,7 @@ public class LocationDataSource {
     public SQLiteDatabase sdb;
     private PreferencesUtils utils;
 
-    public static final String[] COLUMNS = {DBHelper.ID_COLUMN, DBHelper.LOCATION_COLUMN};
+    public static final String[] COLUMNS = {DBHelper.ID_COLUMN, DBHelper.LOCATION_COLUMN, DBHelper.LOCATION_INSIDE_COLUMN};
 
     public LocationDataSource(Context context) {
         dbHelper = new DBHelper(context);
@@ -69,6 +69,13 @@ public class LocationDataSource {
         utils.setServiceDataChanged(true);
     }
 
+    public void updateInsideStatus(int id, Integer insideStatus) {
+        ContentValues values = new ContentValues();
+        values.put(DBHelper.LOCATION_INSIDE_COLUMN, insideStatus);
+
+        sdb.update(DBHelper.DATABASE_TABLE, values, DBHelper.ID_COLUMN + "=" + id, null);
+    }
+
     //delete location from DB and also image from internal storage
     public void deleteLocation(Integer id, String imagePath) {
         new File(imagePath).delete();
@@ -93,6 +100,6 @@ public class LocationDataSource {
     }
 
     private CursorLocation cursorToLocation(Cursor cursor) throws IOException, ClassNotFoundException {
-        return new CursorLocation(cursor.getInt(0), (LocationItem) Serializer.deserialize(cursor.getBlob(1)));
+        return new CursorLocation(cursor.getInt(0), (LocationItem) Serializer.deserialize(cursor.getBlob(1)), cursor.getInt(2));
     }
 }
