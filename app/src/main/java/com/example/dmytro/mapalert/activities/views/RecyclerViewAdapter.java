@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -58,7 +59,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         LocationItem locationItem = items.get(i).getItem();
 
         viewHolder.title.setText(trimText(locationItem.getTitle()));
-        //viewHolder.description.setText("ADAPTER LIST");  //it should be ListView.setAdapter(adapter)
         viewHolder.editButtonListener.setLocation(items.get(i));
         viewHolder.deleteButtonListener.setLocation(items.get(i));
         //viewHolder.layoutListener.setLocation(items.get(i));
@@ -68,8 +68,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //        viewHolder.recyclerView.setAdapter(new RecyclerViewActionAdapterForListActivity(activity, locationItem.getActions()));
 //        viewHolder.recyclerView.setLayoutManager(layoutManager);
 //        viewHolder.recyclerView.setItemAnimator(itemAnimator);
-        RecyclerViewActionAdapterForListActivity adapter = new RecyclerViewActionAdapterForListActivity(activity, locationItem.getActions());
+        RecyclerViewActionAdapterForListActivity adapter = new RecyclerViewActionAdapterForListActivity(activity, locationItem.getActions(), items.get(i).getId(), locationItem);
         viewHolder.listView.setAdapter(adapter);
+        setListViewHeightBasedOnChildren(viewHolder.listView);
 
         Picasso.with(activity).load(new File(locationItem.getImagePath()))
                 .placeholder(R.drawable.ic_image_camera)
@@ -179,5 +180,27 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             builder.append(aStringArray).append(" ");
         }
         return builder.toString();
+    }
+
+    public static void setListViewHeightBasedOnChildren(ListView listView) {
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter == null)
+            return;
+
+        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.UNSPECIFIED);
+        int totalHeight = 0;
+        View view = null;
+        for (int i = 0; i < listAdapter.getCount(); i++) {
+            view = listAdapter.getView(i, view, listView);
+            if (i == 0)
+                view.setLayoutParams(new ViewGroup.LayoutParams(desiredWidth, ViewGroup.LayoutParams.MATCH_PARENT));
+
+            view.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+            totalHeight += view.getMeasuredHeight();
+        }
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+        listView.setLayoutParams(params);
+        listView.requestLayout();
     }
 }

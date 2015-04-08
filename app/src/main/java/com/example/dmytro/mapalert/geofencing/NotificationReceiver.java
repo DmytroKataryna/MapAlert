@@ -73,7 +73,8 @@ public class NotificationReceiver extends BroadcastReceiver {
                 .setGroup("MapAlert")
                 .setGroupSummary(true)
                 .setContentTitle(notificationTitle) //title
-                .setContentText(notificationDescription) //description
+                .setContentText("Tap here to see your location details information")
+                        //.setContentText(notificationDescription) //description
                 .setContentIntent(notificationPendingIntent);
 
         // Dismiss notification once the user touches it.

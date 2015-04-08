@@ -1,32 +1,42 @@
 package com.example.dmytro.mapalert.activities.views;
 
 import android.app.Activity;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
-import com.example.dmytro.mapalert.R;
-import com.example.dmytro.mapalert.pojo.LocationItemAction;
 
+import com.example.dmytro.mapalert.R;
+import com.example.dmytro.mapalert.pojo.LocationItem;
+import com.example.dmytro.mapalert.pojo.LocationItemAction;
+import com.example.dmytro.mapalert.utils.LocationDataSource;
+
+import java.io.IOException;
 import java.util.List;
 
 public class RecyclerViewActionAdapterForListActivity extends BaseAdapter {
 
     private Activity activity;
     private List<LocationItemAction> items;
+    private Integer locationID;
+    private LocationDataSource dataSource;
+    private LocationItem locationItem;
 
 
     public RecyclerViewActionAdapterForListActivity() {
 
     }
 
-    public RecyclerViewActionAdapterForListActivity(Activity activity, List<LocationItemAction> items) {
+    public RecyclerViewActionAdapterForListActivity(Activity activity, List<LocationItemAction> items, Integer locationID, LocationItem locationItem) {
         this.activity = activity;
         this.items = items;
+        this.locationID = locationID;
+        this.locationItem = locationItem;
+        dataSource = LocationDataSource.get(activity);
+        dataSource.open();
     }
 
     @Override
@@ -46,7 +56,7 @@ public class RecyclerViewActionAdapterForListActivity extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
+        final ViewHolder holder;
         if (convertView == null) {
             convertView = View.inflate(activity, R.layout.list_location_action_layout, null);
             holder = new ViewHolder();
@@ -57,10 +67,27 @@ public class RecyclerViewActionAdapterForListActivity extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        LocationItemAction action = items.get(position);
+        final LocationItemAction action = items.get(position);
         holder.action.setText(action.getActionText());
         holder.actionCheckBox.setChecked(action.isDone());
-
+        holder.actionCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    if (action.isDone()) {
+                        action.setDone(false);
+                        holder.actionCheckBox.setChecked(false);
+                        dataSource.updateLocation(locationID, locationItem);
+                    } else {
+                        action.setDone(true);
+                        holder.actionCheckBox.setChecked(true);
+                        dataSource.updateLocation(locationID, locationItem);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         return convertView;
     }
 

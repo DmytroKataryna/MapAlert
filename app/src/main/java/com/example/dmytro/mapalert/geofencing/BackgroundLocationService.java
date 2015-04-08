@@ -6,7 +6,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationServiceItemConverted;
@@ -115,12 +114,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     @Override
     public void onLocationChanged(Location location) {
         if (utils.isDataChanged()) updateLocationData();
-
-//        if (locationItems != null)   //temp (debug)
-//            Log.d(TAG, "SIZE " + locationItems.size());
-//        else
-//            Log.d(TAG, "LocationItems is null");
-
+        
         checkForBelongingToArea(location, locationItems);
     }
 
@@ -130,7 +124,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         for (LocationServiceItemConverted location : listOfLocations) {
             float distance = userCurrentLocation.distanceTo(location.getLocation());
 
-            Toast.makeText(getApplicationContext(), "DIS " + distance, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "DIS " + distance, Toast.LENGTH_SHORT).show();
 
             //send notification that user enter area
             if (distance < RADIUS_IN_METERS && !location.isInside()) {
