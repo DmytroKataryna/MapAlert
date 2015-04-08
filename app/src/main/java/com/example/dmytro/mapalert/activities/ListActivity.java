@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.views.RecyclerViewAdapter;
 import com.example.dmytro.mapalert.geofencing.BackgroundLocationService;
+import com.example.dmytro.mapalert.geofencing.BackgroundTimeService;
 import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.utils.LocationDataSource;
 import com.example.dmytro.mapalert.utils.PreferencesUtils;
@@ -71,6 +72,8 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
         recyclerView.setItemAnimator(itemAnimator);
 
         mAddButton.attachToRecyclerView(recyclerView);
+
+//        startService(new Intent(this, BackgroundTimeService.class));
 
         if (!utils.isServiceAlive())
             startService(new Intent(this, BackgroundLocationService.class));
