@@ -6,28 +6,21 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationTime;
-import com.example.dmytro.mapalert.utils.LocationDataSource;
-import com.example.dmytro.mapalert.utils.PreferencesUtils;
 
-
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Random;
 
 public class BackgroundTimeService extends IntentService {
 
-    private static final String TAG = "BackgroundTimeServiceTAG";
+    private static final String TAG = "TimeServiceTAG";
     public static final String LOCATION_DATA = "location_data_from_data_base";
 
     public static final String BROADCAST_TIME_ACTION = "com.example.broadcast.time.action";
 
-    private PreferencesUtils utils;
-    private LocationDataSource dataSource;
     private LocationTime locationItems;
 
     AlarmManager alarmManager;
@@ -41,8 +34,8 @@ public class BackgroundTimeService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        utils = PreferencesUtils.get(getApplicationContext());
-        dataSource = LocationDataSource.get(getApplicationContext());
+//        utils = PreferencesUtils.get(getApplicationContext());
+//        dataSource = LocationDataSource.get(getApplicationContext());
 
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -54,26 +47,26 @@ public class BackgroundTimeService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         locationItems = convertCursorItemLocationToLocationTime((CursorLocation) intent.getSerializableExtra(LOCATION_DATA));
 
-        String s = locationItems.getHour() + "";
-        String s2 = locationItems.getMinute() + "";
+        for (Integer day : locationItems.getDays()) {
+            Calendar calendar = Calendar.getInstance();
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, locationItems.getHour());
-        //calendar.set(Calendar.DAY_OF_WEEK, 4);  set different alarm managers treeMap iterate
-        calendar.set(Calendar.MINUTE, locationItems.getMinute());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, locationItems.getDataBaseID(), i, PendingIntent.FLAG_UPDATE_CURRENT);
-        //alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 7 * 24 * 60 * 60 * 1000, pendingIntent);  //send broadcast every week at certain time
+            Log.d(TAG, "DAYS " + day + " HOUR " + locationItems.getHour() + " MIN " + locationItems.getMinute());
 
+            if (day.equals(6))
+                calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+            else
+                calendar.set(Calendar.DAY_OF_WEEK, day + 2);
+
+            calendar.set(Calendar.HOUR_OF_DAY, locationItems.getHour());
+            calendar.set(Calendar.MINUTE, locationItems.getMinute());
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, new Random().nextInt(100), i, PendingIntent.FLAG_UPDATE_CURRENT);
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY * 7, pendingIntent);  //send broadcast every week at certain time
+        }
     }
 
 
     public LocationTime convertCursorItemLocationToLocationTime(CursorLocation cursorLocations) {
-
-
         String[] time = cursorLocations.getItem().getTime().split(" : ");
-        LocationTime loc = new LocationTime(cursorLocations.getId(), Integer.valueOf(time[0]), Integer.valueOf(time[1]), cursorLocations.getItem().getRepeat());
-
-        return loc;
+        return new LocationTime(cursorLocations.getId(), Integer.valueOf(time[0]), Integer.valueOf(time[1]), cursorLocations.getItem().getRepeat());
     }
 }
