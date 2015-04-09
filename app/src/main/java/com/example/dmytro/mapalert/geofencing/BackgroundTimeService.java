@@ -11,6 +11,7 @@ import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.pojo.LocationTime;
 
 import java.util.Calendar;
+import java.util.TreeSet;
 
 
 public class BackgroundTimeService extends IntentService {
@@ -79,11 +80,23 @@ public class BackgroundTimeService extends IntentService {
 
 
     public LocationTime convertCursorItemLocationToLocationTime(CursorLocation cursorLocations) {
-        String[] time = cursorLocations.getItem().getTime().split(" : ");
+        String[] time;
+        TreeSet<Integer> selectedItems;
+
+        if (cursorLocations.getItem().getTime() == null)
+            time = new String[]{"0", "0"};
+        else
+            time = cursorLocations.getItem().getTime().split(" : ");
+
+        if (cursorLocations.getItem().getRepeat() == null)
+            selectedItems = new TreeSet<>();
+        else
+            selectedItems = cursorLocations.getItem().getRepeat();
+
         return new LocationTime(cursorLocations.getId(),
                 Integer.valueOf(time[0]),
                 Integer.valueOf(time[1]),
-                cursorLocations.getItem().getRepeat(),
+                selectedItems,
                 cursorLocations.getItem().getTitle(),
                 cursorLocations.getItem().getImagePath());
     }

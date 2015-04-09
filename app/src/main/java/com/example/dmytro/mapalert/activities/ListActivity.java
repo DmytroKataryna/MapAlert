@@ -42,6 +42,7 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
     private SwitchCompat mTrackSwitcher;
     private TextView mTrackTextView;
 
+    private boolean started;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +86,7 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
         if (mTrackSwitcher != null) {  //if service is alive set checked to true
             mTrackSwitcher.setSelected(utils.isServiceAlive());
         }
+        //mAddButton.setActivated(true);
     }
 
     @Override
@@ -112,7 +114,10 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
 
     //fab listener
     public void addButtonListener(View view) {
-        startActivity(new Intent(this, LocationActivity.class));
+        if (!started) {
+            startActivity(new Intent(this, LocationActivity.class));
+        }
+        started = true;
     }
 
     //switcher listener
