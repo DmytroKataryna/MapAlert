@@ -564,15 +564,27 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                 .positiveColorRes(R.color.positive_button_red)
                 .negativeColorRes(R.color.negative_button_blue)
                 .cancelable(false)
+                .autoDismiss(false)
                 .titleColorRes(R.color.dialog_blue)
                 .callback(new MaterialDialog.ButtonCallback() {
                     @Override
                     public void onPositive(MaterialDialog dialog) {
                         String result = ((EditText) dialog.getCustomView().findViewById(R.id.actionDialogEditText)).getText().toString();
-                        int position = locationItemActions.size();
-                        locationItemActions.add(position, new LocationItemAction(result, false));
-                        recyclerView.getLayoutParams().height += 100;
-                        adapter.notifyItemInserted(position);
+                        if (!(result.length() > 0)) {
+                            Toast.makeText(getApplicationContext(), "Action field is required", Toast.LENGTH_SHORT).show();
+                        } else {
+                            int position = locationItemActions.size();
+                            locationItemActions.add(position, new LocationItemAction(result, false));
+                            recyclerView.getLayoutParams().height += 100;
+                            adapter.notifyItemInserted(position);
+                            dialog.dismiss();
+                        }
+                    }
+
+                    @Override
+                    public void onNegative(MaterialDialog dialog) {
+                        super.onNegative(dialog);
+                        dialog.dismiss();
                     }
                 })
                 .show();

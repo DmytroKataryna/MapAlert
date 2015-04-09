@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.views.RecyclerViewAdapter;
 import com.example.dmytro.mapalert.geofencing.BackgroundLocationService;
+import com.example.dmytro.mapalert.geofencing.BackgroundTimeService;
 import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.utils.LocationDataSource;
 import com.example.dmytro.mapalert.utils.PreferencesUtils;
@@ -41,6 +42,7 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
     private SwitchCompat mTrackSwitcher;
     private TextView mTrackTextView;
 
+    private boolean started;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +74,8 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
 
         mAddButton.attachToRecyclerView(recyclerView);
 
+//        startService(new Intent(this, BackgroundTimeService.class));
+
         if (!utils.isServiceAlive())
             startService(new Intent(this, BackgroundLocationService.class));
     }
@@ -82,6 +86,7 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
         if (mTrackSwitcher != null) {  //if service is alive set checked to true
             mTrackSwitcher.setSelected(utils.isServiceAlive());
         }
+        //mAddButton.setActivated(true);
     }
 
     @Override
@@ -109,7 +114,10 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
 
     //fab listener
     public void addButtonListener(View view) {
-        startActivity(new Intent(this, LocationActivity.class));
+        if (!started) {
+            startActivity(new Intent(this, LocationActivity.class));
+        }
+        started = true;
     }
 
     //switcher listener
