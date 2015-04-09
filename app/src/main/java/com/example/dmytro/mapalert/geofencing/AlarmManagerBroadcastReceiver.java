@@ -1,11 +1,13 @@
 package com.example.dmytro.mapalert.geofencing;
 
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
@@ -18,15 +20,20 @@ import java.util.Random;
 public class AlarmManagerBroadcastReceiver extends BroadcastReceiver {
 
     final public static String ONE_TIME = "onetime";
+    final public static String NOTIF_TITLE = "notification_title";
+    final public static String NOTIF_IMG_PATH = "notification_image_path";
+
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        String title = intent.getStringExtra(NOTIF_TITLE);
+        String imagePAth = intent.getStringExtra(NOTIF_IMG_PATH);
 
-        sendNotification(context);
+        sendNotification(context, title, imagePAth);
 
     }
 
-    private void sendNotification(Context context) {
+    private void sendNotification(Context context, String title, String imagePath) {
         // Create an explicit content Intent that starts the main Activity.
         Intent notificationIntent = new Intent(context, ListActivity.class);
 
@@ -43,31 +50,14 @@ public class AlarmManagerBroadcastReceiver extends BroadcastReceiver {
         PendingIntent notificationPendingIntent =
                 stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
-//        Notification notif = new NotificationCompat.Builder(context)
-//                .setContentTitle(notificationTitle)
-//                .setContentText(notificationDescription)
-//                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
-//                .setSmallIcon(R.mipmap.ic_launcher)
-//                .setGroup("MapAlert")
-//                .setContentIntent(notificationPendingIntent)
-//                .addPerson("personMap")
-//                .build();
-//
-//        NotificationManagerCompat notificationManager =
-//                NotificationManagerCompat.from(context);
-//        notificationManager.notify(new Random().nextInt(1000), notif);
-
-        // Get a notification builder that's compatible with platform versions >= 4
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
 
-        // Define the notification settings.
         builder.setSmallIcon(R.mipmap.ic_launcher)
-                // In a real app, you may want to use a library like Volley
-                // to decode the Bitmap.
+                .setDefaults(Notification.DEFAULT_ALL)
                 .setColor(Color.RED)
-                .setContentTitle("Titile") //title
+                .setContentTitle(title) //title
                 .setContentText("Tap here to see your location details information")
-                        //.setContentText(notificationDescription) //description
+                .setLargeIcon(BitmapFactory.decodeFile(imagePath))
                 .setContentIntent(notificationPendingIntent);
 
         // Dismiss notification once the user touches it.
@@ -80,34 +70,5 @@ public class AlarmManagerBroadcastReceiver extends BroadcastReceiver {
 
         // Issue the notification
         mNotificationManager.notify(new Random().nextInt(1000), builder.build());
-    }
-
-
-    //PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-    //        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "YOUR TAG");
-//        //Acquire the lock
-//        wl.acquire();
-    public void SetAlarm(Context context) {
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(context, AlarmManagerBroadcastReceiver.class);
-        intent.putExtra(ONE_TIME, Boolean.FALSE);
-        PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
-        //After after 30 seconds
-        am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 1000 * 5, pi);
-    }
-
-    public void CancelAlarm(Context context) {
-        Intent intent = new Intent(context, AlarmManagerBroadcastReceiver.class);
-        PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(sender);
-    }
-
-    public void setOnetimeTimer(Context context) {
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(context, AlarmManagerBroadcastReceiver.class);
-        intent.putExtra(ONE_TIME, Boolean.TRUE);
-        PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
-        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pi);
     }
 }

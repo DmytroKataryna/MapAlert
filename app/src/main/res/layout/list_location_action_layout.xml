@@ -25,7 +25,7 @@
             android:id="@+id/listActivityActionTextView"
             android:gravity="left|bottom"
             android:paddingLeft="15dp"
-            android:paddingBottom="8dp" />
+            android:paddingBottom="10dp" />
 
     </LinearLayout>
 </LinearLayout>
