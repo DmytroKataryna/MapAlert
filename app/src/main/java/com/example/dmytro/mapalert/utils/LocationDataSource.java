@@ -61,7 +61,10 @@ public class LocationDataSource {
         cursor.moveToFirst();
         CursorLocation item = cursorToLocation(cursor);
         utils.setServiceDataChanged(true);
-        context.startService(new Intent(context, BackgroundTimeService.class).putExtra(BackgroundTimeService.LOCATION_DATA, item));
+
+        if (locationItem.isTimeSelected()) {
+            context.startService(new Intent(context, BackgroundTimeService.class).putExtra(BackgroundTimeService.LOCATION_DATA, item));
+        }
         cursor.close();
         return item;
     }
@@ -73,7 +76,18 @@ public class LocationDataSource {
 
         sdb.update(DBHelper.DATABASE_TABLE, values, DBHelper.ID_COLUMN + "=" + id, null);
         utils.setServiceDataChanged(true);
-        context.startService(new Intent(context, BackgroundTimeService.class).putExtra(BackgroundTimeService.LOCATION_DATA, new CursorLocation(id, locationItem, 0)));
+        if (locationItem.isTimeSelected()) {
+            context.startService(new Intent(context, BackgroundTimeService.class)
+                    .putExtra(BackgroundTimeService.LOCATION_DATA, new CursorLocation(id, locationItem, 0)));
+        } else if (locationItem.getRepeat() != null && locationItem.getRepeat().size() == 0) {
+            context.startService(new Intent(context, BackgroundTimeService.class)
+                    .putExtra(BackgroundTimeService.LOCATION_DATA, new CursorLocation(id, locationItem, 0))
+                    .putExtra(BackgroundTimeService.BOOLEAN_DELETE_ALARM, true));
+        } else if (!locationItem.isTimeSelected()) {
+            context.startService(new Intent(context, BackgroundTimeService.class)
+                    .putExtra(BackgroundTimeService.LOCATION_DATA, new CursorLocation(id, locationItem, 0))
+                    .putExtra(BackgroundTimeService.BOOLEAN_DELETE_ALARM, true));
+        }
     }
 
     public void updateInsideStatus(int id, Integer insideStatus) {
@@ -84,7 +98,12 @@ public class LocationDataSource {
     }
 
     //delete location from DB and also image from internal storage
-    public void deleteLocation(Integer id, String imagePath) {
+    public void deleteLocation(Integer id, String imagePath, LocationItem item) {
+
+        context.startService(new Intent(context, BackgroundTimeService.class)
+                .putExtra(BackgroundTimeService.LOCATION_DATA, new CursorLocation(id, item, 0))
+                .putExtra(BackgroundTimeService.BOOLEAN_DELETE_ALARM, true));
+
         new File(imagePath).delete();
         sdb.delete(DBHelper.DATABASE_TABLE, DBHelper.ID_COLUMN + " = ?", new String[]{String.valueOf(id)});
         utils.setServiceDataChanged(true);
