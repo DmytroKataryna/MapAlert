@@ -4,9 +4,9 @@
     tools:context=".MainActivity">
 
     <item
-        android:id="@+id/done"
-        android:icon="@drawable/ic_action_done_white"
-        android:title="Done"
+        android:id="@+id/delete"
+        android:icon="@drawable/ic_action_delete"
+        android:title="Delete"
         app:showAsAction="ifRoom" />
 
 </menu>

@@ -53,6 +53,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.melnykov.fab.FloatingActionButton;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -86,6 +87,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     private ScrollView scrollView;
     private Marker locationMarker;
     private ImageButton mSearchButton;
+    private FloatingActionButton mDoneFAB;
 
     //Image
     private ImageView mLocPhoto;
@@ -138,10 +140,11 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         mTitleEditText = (EditText) findViewById(R.id.titleEditText);
         mTitleEditText.setOnFocusChangeListener(this);
 
-        //mDescriptionEditText = (EditText) findViewById(R.id.descriptionEditText);
-
         scrollView = (ScrollView) findViewById(R.id.scrollView);
         scrollView.setOnTouchListener(this);
+
+        mDoneFAB = (FloatingActionButton) findViewById(R.id.fab_save_update_location);
+        mDoneFAB.setOnClickListener(this);
 
         mRepeatTextView = (TextView) findViewById(R.id.repeatTextView);
 
@@ -320,6 +323,31 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                 scrollView.scrollTo(scrollView.getTop(), scrollView.getTop());
                 mHeadLayout.setFocusable(true);
                 break;
+
+            case R.id.fab_save_update_location:
+                if (!checkIfAvailableToLogin()) return;
+
+                if (imagePath == null) //if nothing selected , save default img
+                    imagePath = "drawable://" + R.drawable.ic_image_camera;
+
+                if (mTimeSelected) { //depends on time switcher selection , it is saved different object
+                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);     // get data from recycler view and save list actions to db
+                } else {
+                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, latitude, longitude);  // get data from recycler view and save list actions to db
+                }
+
+                try { //create or update location
+                    if (!getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false)) {
+                        dataSource.createLocation(loc);
+                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                    } else {
+                        dataSource.updateLocation(dataBaseId, loc);
+                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                break;
         }
     }
 
@@ -334,31 +362,31 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.done:
+            case R.id.delete:
 
-                if (!checkIfAvailableToLogin()) return false;
-
-                if (imagePath == null) //if nothing selected , save default img
-                    imagePath = "drawable://" + R.drawable.ic_image_camera;
-
-                if (mTimeSelected) { //depends on time switcher selection , it is saved different object
-                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);     // get data from recycler view and save list actions to db
-                } else {
-                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, latitude, longitude);  // get data from recycler view and save list actions to db
-                }
-
-
-                try { //create or update location
-                    if (!getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false)) {
-                        dataSource.createLocation(loc);
-                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                    } else {
-                        dataSource.updateLocation(dataBaseId, loc);
-                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                    }
-                } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
+//                if (!checkIfAvailableToLogin()) return false;
+//
+//                if (imagePath == null) //if nothing selected , save default img
+//                    imagePath = "drawable://" + R.drawable.ic_image_camera;
+//
+//                if (mTimeSelected) { //depends on time switcher selection , it is saved different object
+//                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);     // get data from recycler view and save list actions to db
+//                } else {
+//                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, latitude, longitude);  // get data from recycler view and save list actions to db
+//                }
+//
+//
+//                try { //create or update location
+//                    if (!getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false)) {
+//                        dataSource.createLocation(loc);
+//                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+//                    } else {
+//                        dataSource.updateLocation(dataBaseId, loc);
+//                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+//                    }
+//                } catch (IOException | ClassNotFoundException e) {
+//                    e.printStackTrace();
+//                }
                 return true;
         }
         return super.onOptionsItemSelected(item);

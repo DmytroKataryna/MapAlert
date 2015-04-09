@@ -301,7 +301,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
-        android:src="@drawable/ic_action_done_white"
+        android:src="@drawable/ic_content_plus"
         fab:fab_colorNormal="#33b5e5"
         fab:fab_colorPressed="#039BE5"
         android:layout_margin="16dp" />
