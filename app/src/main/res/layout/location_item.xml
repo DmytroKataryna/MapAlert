@@ -54,29 +54,6 @@
             android:paddingBottom="2dp"
             android:layout_marginTop="5dp" />
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="25dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5">
-
-            <ImageButton
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:id="@+id/editItemButton"
-                android:background="@drawable/ic_image_edit_blue"
-                android:padding="3dp"
-                android:layout_marginLeft="3dp" />
-
-            <ImageButton
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:id="@+id/deleteItemButton"
-                android:background="@drawable/ic_action_delete"
-                android:layout_marginTop="7dp"
-                android:layout_marginRight="2dp" />
-        </LinearLayout>
-
     </LinearLayout>
 
 
