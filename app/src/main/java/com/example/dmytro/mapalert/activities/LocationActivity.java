@@ -182,10 +182,13 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
         mApiClient.connect();
 
+        selectAllOptionsInsideRepeatDialog(selectedItems, checkedDialogItems);
+
         //start edit mode (restore data )
         if (getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false))
             restoreData();
     }
+
 
     //------------------------------------------------- RESTORE DATA (location object from DB )---------------------
     private void restoreData() {
@@ -514,7 +517,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
             locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(getUserLocation().latitude, getUserLocation().longitude), 15));
-
         } else {
             locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
@@ -627,5 +629,12 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     private void changeRecyclerViewLayoutParams(List<LocationItemAction> locationItemActions, RecyclerView recyclerView) {
         int size = locationItemActions.size();
         recyclerView.getLayoutParams().height = size * 100;
+    }
+
+    private void selectAllOptionsInsideRepeatDialog(TreeSet<Integer> selectedItems, boolean[] checkedDialogItems) {
+        for (int i = 0; i < 7; i++) {
+            selectedItems.add(i);
+            checkedDialogItems[i] = true;
+        }
     }
 }
