@@ -53,6 +53,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.melnykov.fab.FloatingActionButton;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -86,6 +87,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     private ScrollView scrollView;
     private Marker locationMarker;
     private ImageButton mSearchButton;
+    private FloatingActionButton mDoneFAB;
 
     //Image
     private ImageView mLocPhoto;
@@ -103,7 +105,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     private String mTime;
 
     //layouts
-    private LinearLayout mHeadLayout, mTimeLayout;
+    private LinearLayout mHeadLayout, mTimeLayout, mBottomLayout;
     private RelativeLayout mRepeatLayout;
 
     //dialog items
@@ -124,6 +126,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         dataSource = LocationDataSource.get(getApplicationContext());
         dataSource.open();
 
+        mBottomLayout = (LinearLayout) findViewById(R.id.bottomLayout);
         mHeadLayout = (LinearLayout) findViewById(R.id.headLayout);
         mHeadLayout.setOnClickListener(this);
 
@@ -138,10 +141,11 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         mTitleEditText = (EditText) findViewById(R.id.titleEditText);
         mTitleEditText.setOnFocusChangeListener(this);
 
-        //mDescriptionEditText = (EditText) findViewById(R.id.descriptionEditText);
-
         scrollView = (ScrollView) findViewById(R.id.scrollView);
         scrollView.setOnTouchListener(this);
+
+        mDoneFAB = (FloatingActionButton) findViewById(R.id.fab_save_update_location);
+        mDoneFAB.setOnClickListener(this);
 
         mRepeatTextView = (TextView) findViewById(R.id.repeatTextView);
 
@@ -178,10 +182,13 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
         mApiClient.connect();
 
+        selectAllOptionsInsideRepeatDialog(selectedItems, checkedDialogItems);
+
         //start edit mode (restore data )
         if (getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false))
             restoreData();
     }
+
 
     //------------------------------------------------- RESTORE DATA (location object from DB )---------------------
     private void restoreData() {
@@ -320,6 +327,31 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                 scrollView.scrollTo(scrollView.getTop(), scrollView.getTop());
                 mHeadLayout.setFocusable(true);
                 break;
+
+            case R.id.fab_save_update_location:
+                if (!checkIfAvailableToLogin()) return;
+
+                if (imagePath == null) //if nothing selected , save default img
+                    imagePath = "drawable://" + R.drawable.ic_image_camera;
+
+                if (mTimeSelected) { //depends on time switcher selection , it is saved different object
+                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);     // get data from recycler view and save list actions to db
+                } else {
+                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, latitude, longitude);  // get data from recycler view and save list actions to db
+                }
+
+                try { //create or update location
+                    if (!getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false)) {
+                        dataSource.createLocation(loc);
+                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                    } else {
+                        dataSource.updateLocation(dataBaseId, loc);
+                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                break;
         }
     }
 
@@ -334,31 +366,37 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.done:
+            case R.id.delete:
 
-                if (!checkIfAvailableToLogin()) return false;
-
-                if (imagePath == null) //if nothing selected , save default img
-                    imagePath = "drawable://" + R.drawable.ic_image_camera;
-
-                if (mTimeSelected) { //depends on time switcher selection , it is saved different object
-                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);     // get data from recycler view and save list actions to db
+                if (loc != null) {
+                    dataSource.deleteLocation(dataBaseId, loc.getImagePath(), loc);
+                    startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                 } else {
-                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, latitude, longitude);  // get data from recycler view and save list actions to db
+                    onBackPressed();
                 }
-
-
-                try { //create or update location
-                    if (!getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false)) {
-                        dataSource.createLocation(loc);
-                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                    } else {
-                        dataSource.updateLocation(dataBaseId, loc);
-                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                    }
-                } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
+//                if (!checkIfAvailableToLogin()) return false;
+//
+//                if (imagePath == null) //if nothing selected , save default img
+//                    imagePath = "drawable://" + R.drawable.ic_image_camera;
+//
+//                if (mTimeSelected) { //depends on time switcher selection , it is saved different object
+//                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);     // get data from recycler view and save list actions to db
+//                } else {
+//                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, latitude, longitude);  // get data from recycler view and save list actions to db
+//                }
+//
+//
+//                try { //create or update location
+//                    if (!getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false)) {
+//                        dataSource.createLocation(loc);
+//                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+//                    } else {
+//                        dataSource.updateLocation(dataBaseId, loc);
+//                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+//                    }
+//                } catch (IOException | ClassNotFoundException e) {
+//                    e.printStackTrace();
+//                }
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -388,10 +426,12 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         if (mTimeSwitch.isChecked()) {
             mTimeSelected = true;
             mTimeLayout.setVisibility(View.VISIBLE);
+            mBottomLayout.setVisibility(View.GONE);
             mTime = mTimePicker.getCurrentHour() + " : " + mTimePicker.getCurrentMinute();
         } else {
             mTimeSelected = false;
             mTimeLayout.setVisibility(View.GONE);
+            mBottomLayout.setVisibility(View.VISIBLE);
         }
     }
 
@@ -439,14 +479,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         imm.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), 0);
     }
 
-
-    /////--------------------------------------------------------------------------------------
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        //dataSource.close();  //make bug
-    }
-
+    /////-------------------------------------------------------------------------------------
     @Override
     public void onConnected(Bundle bundle) {
         //Custom Map Fragment , where i handle scroll UP/DOWn problems
@@ -479,7 +512,9 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         ///////////Move camera to user position or move to selected position
 
         if (longitude == 0d & longitude == 0d) {
-            locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(getUserLocation().latitude, getUserLocation().longitude)));
+            latitude = getUserLocation().latitude;
+            longitude = getUserLocation().longitude;
+            locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(getUserLocation().latitude, getUserLocation().longitude), 15));
         } else {
@@ -594,5 +629,12 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     private void changeRecyclerViewLayoutParams(List<LocationItemAction> locationItemActions, RecyclerView recyclerView) {
         int size = locationItemActions.size();
         recyclerView.getLayoutParams().height = size * 100;
+    }
+
+    private void selectAllOptionsInsideRepeatDialog(TreeSet<Integer> selectedItems, boolean[] checkedDialogItems) {
+        for (int i = 0; i < 7; i++) {
+            selectedItems.add(i);
+            checkedDialogItems[i] = true;
+        }
     }
 }

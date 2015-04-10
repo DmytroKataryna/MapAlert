@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.TaskStackBuilder;
 
 import com.example.dmytro.mapalert.R;
@@ -69,6 +68,7 @@ public class NotificationReceiver extends BroadcastReceiver {
                 // In a real app, you may want to use a library like Volley
                 // to decode the Bitmap.
                 .setLargeIcon(BitmapFactory.decodeFile(imagePath))
+                .setDefaults(Notification.DEFAULT_ALL)
                 .setColor(Color.RED)
                 .setGroup("MapAlert")
                 .setGroupSummary(true)

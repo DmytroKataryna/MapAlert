@@ -59,16 +59,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         LocationItem locationItem = items.get(i).getItem();
 
         viewHolder.title.setText(trimText(locationItem.getTitle()));
-        viewHolder.editButtonListener.setLocation(items.get(i));
-        viewHolder.deleteButtonListener.setLocation(items.get(i));
-        //viewHolder.layoutListener.setLocation(items.get(i));
+//        viewHolder.editButtonListener.setLocation(items.get(i));
+//        viewHolder.deleteButtonListener.setLocation(items.get(i));
+        viewHolder.layoutListener.setLocation(items.get(i));
 
-//        LinearLayoutManager layoutManager = new LinearLayoutManager(activity);
-//        RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
-//        viewHolder.recyclerView.setAdapter(new RecyclerViewActionAdapterForListActivity(activity, locationItem.getActions()));
-//        viewHolder.recyclerView.setLayoutManager(layoutManager);
-//        viewHolder.recyclerView.setItemAnimator(itemAnimator);
-        RecyclerViewActionAdapterForListActivity adapter = new RecyclerViewActionAdapterForListActivity(activity, locationItem.getActions(), items.get(i).getId(), locationItem);
+        RecyclerViewActionAdapterForListActivity adapter = new RecyclerViewActionAdapterForListActivity(activity, locationItem.getActions(), items.get(i).getId(), locationItem, viewHolder.itemLayout);
         viewHolder.listView.setAdapter(adapter);
         setListViewHeightBasedOnChildren(viewHolder.listView);
 
@@ -98,37 +93,81 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     class ViewHolder extends RecyclerView.ViewHolder {
 
         private LinearLayout itemLayout;
-//        private ItemLayoutListener layoutListener;
+        private ItemLayoutListener layoutListener;
 
         private TextView title;
         private ListView listView;
         private ImageView photo;
 
-        private ImageButton deleteButton, editButton;
-        private DeleteButtonListener deleteButtonListener;
-        private EditButtonListener editButtonListener;
+        //  private ImageButton deleteButton, editButton;
+//        private DeleteButtonListener deleteButtonListener;
+//        private EditButtonListener editButtonListener;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             itemLayout = (LinearLayout) itemView.findViewById(R.id.itemLayout);
-//            layoutListener = new ItemLayoutListener();
-//            itemLayout.setOnClickListener(layoutListener);
+            layoutListener = new ItemLayoutListener();
+            itemLayout.setOnClickListener(layoutListener);
 
             title = (TextView) itemView.findViewById(R.id.titleItemTextView);
             listView = (ListView) itemView.findViewById(R.id.listLocationActionListView);
             photo = (ImageView) itemView.findViewById(R.id.locPhotoView);
-            deleteButton = (ImageButton) itemView.findViewById(R.id.deleteItemButton);
-            deleteButtonListener = new DeleteButtonListener();
-            deleteButton.setOnClickListener(deleteButtonListener);
-
-            editButton = (ImageButton) itemView.findViewById(R.id.editItemButton);
-            editButtonListener = new EditButtonListener();
-            editButton.setOnClickListener(editButtonListener);
+//            deleteButton = (ImageButton) itemView.findViewById(R.id.deleteItemButton);
+//            deleteButtonListener = new DeleteButtonListener();
+//            deleteButton.setOnClickListener(deleteButtonListener);
+//
+//            editButton = (ImageButton) itemView.findViewById(R.id.editItemButton);
+//            editButtonListener = new EditButtonListener();
+//            editButton.setOnClickListener(editButtonListener);
         }
     }
 
-    private class EditButtonListener implements View.OnClickListener {
+//    private class EditButtonListener implements View.OnClickListener {
+//        private CursorLocation item;
+//
+//        @Override
+//        public void onClick(View v) {
+//            //start Detail activity with Item ID and Boolean field (Edit Mode)
+//            activity.startActivity(new Intent(activity, LocationActivity.class)
+//                    .putExtra(ITEM_KEY, item).putExtra(ITEM_EDIT_MODE, true));
+//        }
+//
+//        public void setLocation(CursorLocation locationItem) {
+//            this.item = locationItem;
+//        }
+//    }
+//
+//    private class DeleteButtonListener implements View.OnClickListener {
+//        private CursorLocation item;
+//
+//        @Override
+//        public void onClick(View v) {
+//
+//            new MaterialDialog.Builder(activity)
+//                    .title("Delete Location")
+//                    .content("Are you sure you want to permanently delete this location?")
+//                    .positiveText("Delete")
+//                    .negativeText("Cancel")
+//                    .positiveColorRes(R.color.positive_button_red)
+//                    .negativeColorRes(R.color.negative_button_blue)
+//                    .titleColorRes(R.color.dialog_blue)
+//                    .callback(new MaterialDialog.ButtonCallback() {
+//                        @Override
+//                        public void onPositive(MaterialDialog dialog) {
+//                            delete(item);
+//                        }
+//                    })
+//                    .show();
+//        }
+//
+//        public void setLocation(CursorLocation locationItem) {
+//            this.item = locationItem;
+//        }
+//    }
+
+    private class ItemLayoutListener implements View.OnClickListener {
+
         private CursorLocation item;
 
         @Override
@@ -143,33 +182,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
-    private class DeleteButtonListener implements View.OnClickListener {
-        private CursorLocation item;
-
-        @Override
-        public void onClick(View v) {
-
-            new MaterialDialog.Builder(activity)
-                    .title("Delete Location")
-                    .content("Are you sure you want to permanently delete this location?")
-                    .positiveText("Delete")
-                    .negativeText("Cancel")
-                    .positiveColorRes(R.color.positive_button_red)
-                    .negativeColorRes(R.color.negative_button_blue)
-                    .titleColorRes(R.color.dialog_blue)
-                    .callback(new MaterialDialog.ButtonCallback() {
-                        @Override
-                        public void onPositive(MaterialDialog dialog) {
-                            delete(item);
-                        }
-                    })
-                    .show();
-        }
-
-        public void setLocation(CursorLocation locationItem) {
-            this.item = locationItem;
-        }
-    }
 
     //convert text (delete spaces and line separators)
     public String trimText(String text) {

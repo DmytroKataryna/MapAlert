@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
@@ -23,17 +24,19 @@ public class RecyclerViewActionAdapterForListActivity extends BaseAdapter {
     private Integer locationID;
     private LocationDataSource dataSource;
     private LocationItem locationItem;
+    private LinearLayout itemLayout;
 
 
     public RecyclerViewActionAdapterForListActivity() {
 
     }
 
-    public RecyclerViewActionAdapterForListActivity(Activity activity, List<LocationItemAction> items, Integer locationID, LocationItem locationItem) {
+    public RecyclerViewActionAdapterForListActivity(Activity activity, List<LocationItemAction> items, Integer locationID, LocationItem locationItem, LinearLayout itemLayout) {
         this.activity = activity;
         this.items = items;
         this.locationID = locationID;
         this.locationItem = locationItem;
+        this.itemLayout = itemLayout;
         dataSource = LocationDataSource.get(activity);
         dataSource.open();
     }
@@ -67,7 +70,15 @@ public class RecyclerViewActionAdapterForListActivity extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         final LocationItemAction action = items.get(position);
+
         holder.action.setText(action.getActionText());
+        holder.action.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                itemLayout.callOnClick();
+            }
+        });
+
         holder.actionCheckBox.setChecked(action.isDone());
         holder.actionCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,6 +98,7 @@ public class RecyclerViewActionAdapterForListActivity extends BaseAdapter {
                 }
             }
         });
+
         return convertView;
     }
 
@@ -95,67 +107,3 @@ public class RecyclerViewActionAdapterForListActivity extends BaseAdapter {
         CheckBox actionCheckBox;
     }
 }
-
-//public class RecyclerViewActionAdapterForListActivity extends RecyclerView.Adapter<RecyclerViewActionAdapterForListActivity.ViewHolder> {
-//
-//    private Activity activity;
-//
-//    private List<LocationItemAction> items;
-//
-//
-//    public RecyclerViewActionAdapterForListActivity(Activity activity, List<LocationItemAction> items) {
-//        this.activity = activity;
-//        this.items = items;
-//    }
-//
-//
-//    @Override
-//    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_location_action_layout, parent, false);
-//        return new ViewHolder(v);
-//    }
-//
-//    @Override
-//    public void onBindViewHolder(final ViewHolder holder, int position) {
-//        final LocationItemAction locationAction = items.get(position);
-//
-//        holder.action.setText(locationAction.getActionText());
-//        holder.actionCheckBox.setChecked(locationAction.isDone());
-//
-//        holder.actionCheckBox.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {   // and after each click update data to DB
-//                if (locationAction.isDone()) {
-//                    locationAction.setDone(false);
-//                    holder.actionCheckBox.setChecked(false);
-//                } else {
-//                    locationAction.setDone(true);
-//                    holder.actionCheckBox.setChecked(true);
-//                }
-//                notifyDataSetChanged();
-//            }
-//        });
-//    }
-//
-//    @Override
-//    public int getItemCount() {
-//        return items.size();
-//    }
-//
-//    class ViewHolder extends RecyclerView.ViewHolder {
-//
-//        private TextView action;
-//        private CheckBox actionCheckBox;
-//
-//        public ViewHolder(View itemView) {
-//            super(itemView);
-//
-//            action = (TextView) itemView.findViewById(R.id.listActivityActionTextView);
-//
-//            actionCheckBox = (CheckBox) itemView.findViewById(R.id.listActivityActionCheckBox);
-//
-//
-//        }
-//    }
-//
-//}

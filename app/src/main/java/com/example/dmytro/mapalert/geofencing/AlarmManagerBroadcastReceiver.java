@@ -1,6 +1,5 @@
 package com.example.dmytro.mapalert.geofencing;
 
-import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -55,7 +54,7 @@ public class AlarmManagerBroadcastReceiver extends BroadcastReceiver {
         builder.setSmallIcon(R.mipmap.ic_launcher)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setColor(Color.RED)
-                .setContentTitle(title) //title
+                .setContentTitle("Check your " + title + " actions") //title
                 .setContentText("Tap here to see your location details information")
                 .setLargeIcon(BitmapFactory.decodeFile(imagePath))
                 .setContentIntent(notificationPendingIntent);

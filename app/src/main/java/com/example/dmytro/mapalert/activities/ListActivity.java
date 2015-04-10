@@ -83,6 +83,7 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
     @Override
     protected void onResume() {
         super.onResume();
+        started = false;
         if (mTrackSwitcher != null) {  //if service is alive set checked to true
             mTrackSwitcher.setSelected(utils.isServiceAlive());
         }
