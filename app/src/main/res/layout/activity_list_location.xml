@@ -14,11 +14,12 @@
         android:id="@+id/fab_add_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
+        android:layout_gravity="bottom|right"
         android:src="@drawable/ic_content_plus"
         fab:fab_colorNormal="@color/positive_button_red"
         fab:fab_colorPressed="#F44336"
         android:onClick="addButtonListener"
-        android:layout_margin="16dp" />
+        android:layout_marginBottom="20dp"
+        android:layout_marginRight="35dp" />
 
 </FrameLayout>

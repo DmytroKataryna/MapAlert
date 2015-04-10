@@ -103,7 +103,7 @@
                         <android.support.v7.widget.RecyclerView
                             android:id="@+id/locationActionRecycleList"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="0dp" />
 
                     </LinearLayout>
 
@@ -265,25 +265,42 @@
                             android:id="@+id/map"
                             android:name="com.example.dmytro.mapalert.activities.views.CustomMapFragment" />
 
-                        <EditText
-                            android:layout_width="217dp"
-                            android:layout_height="45dp"
-                            android:id="@+id/searchEditText"
-                            android:inputType="textNoSuggestions"
-                            android:hint="Search ..."
-                            android:background="@drawable/text_view_background"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginRight="25dp" />
 
-                        <ImageButton
-                            android:background="#FAFAFA"
-                            android:src="@drawable/ic_action_search"
-                            android:alpha="0.75"
-                            android:layout_width="37dp"
-                            android:layout_height="37dp"
-                            android:id="@+id/searchImageButton"
-                            android:layout_marginLeft="258dp"
-                            android:layout_marginTop="12dp" />
+                        <LinearLayout
+                            android:orientation="horizontal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp">
+
+                            <FrameLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:alpha="0.75"
+                                android:background="#FAFAFA"
+                                android:layout_marginLeft="8dp">
+
+                                <EditText
+                                    android:layout_width="217dp"
+                                    android:layout_height="match_parent"
+                                    android:id="@+id/searchEditText"
+                                    android:inputType="textNoSuggestions"
+                                    android:hint="Search ..."
+                                    android:background="@drawable/text_view_background"
+                                    android:textColor="@android:color/black"
+                                    android:layout_gravity="center_vertical"
+                                     />
+                            </FrameLayout>
+
+                            <ImageButton
+                                android:background="#FAFAFA"
+                                android:src="@drawable/ic_action_search"
+                                android:alpha="0.75"
+                                android:layout_width="37dp"
+                                android:layout_height="37dp"
+                                android:id="@+id/searchImageButton"
+                                android:layout_marginLeft="8dp" />
+
+                        </LinearLayout>
 
                     </FrameLayout>
 
@@ -300,9 +317,15 @@
         android:id="@+id/fab_save_update_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
+        android:layout_gravity="bottom|right"
         android:src="@drawable/ic_content_plus"
-        fab:fab_colorNormal="#33b5e5"
-        fab:fab_colorPressed="#039BE5"
-        android:layout_margin="16dp" />
+        fab:fab_colorNormal="@color/positive_button_red"
+        fab:fab_colorPressed="#F44336"
+        android:layout_marginBottom="22dp"
+        android:layout_marginRight="30dp" />
 </FrameLayout>
+
+
+    <!--fab:fab_colorNormal="#33b5e5"--><!--fab:fab_colorPressed="#039BE5"-->
+
+    <!---->

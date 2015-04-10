@@ -105,7 +105,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     private String mTime;
 
     //layouts
-    private LinearLayout mHeadLayout, mTimeLayout;
+    private LinearLayout mHeadLayout, mTimeLayout, mBottomLayout;
     private RelativeLayout mRepeatLayout;
 
     //dialog items
@@ -126,6 +126,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         dataSource = LocationDataSource.get(getApplicationContext());
         dataSource.open();
 
+        mBottomLayout = (LinearLayout) findViewById(R.id.bottomLayout);
         mHeadLayout = (LinearLayout) findViewById(R.id.headLayout);
         mHeadLayout.setOnClickListener(this);
 
@@ -422,10 +423,12 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         if (mTimeSwitch.isChecked()) {
             mTimeSelected = true;
             mTimeLayout.setVisibility(View.VISIBLE);
+            mBottomLayout.setVisibility(View.GONE);
             mTime = mTimePicker.getCurrentHour() + " : " + mTimePicker.getCurrentMinute();
         } else {
             mTimeSelected = false;
             mTimeLayout.setVisibility(View.GONE);
+            mBottomLayout.setVisibility(View.VISIBLE);
         }
     }
 
@@ -473,14 +476,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         imm.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), 0);
     }
 
-
-    /////--------------------------------------------------------------------------------------
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        //dataSource.close();  //make bug
-    }
-
+    /////-------------------------------------------------------------------------------------
     @Override
     public void onConnected(Bundle bundle) {
         //Custom Map Fragment , where i handle scroll UP/DOWn problems
@@ -513,9 +509,12 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         ///////////Move camera to user position or move to selected position
 
         if (longitude == 0d & longitude == 0d) {
-            locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(getUserLocation().latitude, getUserLocation().longitude)));
+            latitude = getUserLocation().latitude;
+            longitude = getUserLocation().longitude;
+            locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(getUserLocation().latitude, getUserLocation().longitude), 15));
+
         } else {
             locationMarker = googleMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
