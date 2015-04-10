@@ -134,4 +134,10 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
             utils.setServiceState(false);
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dataSource.close();
+    }
 }

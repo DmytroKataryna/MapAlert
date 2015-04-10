@@ -643,4 +643,10 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
             checkedDialogItems[i] = true;
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dataSource.close();
+    }
 }

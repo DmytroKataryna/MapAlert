@@ -22,5 +22,18 @@
     <string name="unknown_geofence_transition">Unknown Transition</string>
 
     <string name="geofence_transition_notification_text">Click notification to return to app</string>
+    <string name="menu_delete_txt">Delete</string>
+    <string name="title_txt">TITLE :</string>
+    <string name="action_hint_txt">Action ...</string>
+    <string name="action_main_txt">Action Text</string>
+    <string name="map_search_image_description">map_search_image</string>
+    <string name="map_search_hint_txt">Search ...</string>
+    <string name="time_repeat_txt"><![CDATA[Every Day >]]></string>
+    <string name="time_repeat_text_view">Repeat :</string>
+    <string name="remind_me_txt">Remind me at :</string>
+    <string name="photo_txt">Photo :</string>
+    <string name="add_new_action_image">add new action button</string>
+    <string name="action_text_view">Actions :</string>
+    <string name="title_text_view">Title :</string>
 
 </resources>

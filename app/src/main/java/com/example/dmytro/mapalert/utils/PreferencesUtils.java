@@ -3,7 +3,6 @@ package com.example.dmytro.mapalert.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 public class PreferencesUtils {
 
@@ -12,7 +11,7 @@ public class PreferencesUtils {
 
     // *****************  preferences data *****************
     private static final String KEY_SHARED_PREF = "ANDROID_MAP_ALERT";
-    private static final int KEY_MODE_PRIVATE = 0;
+
 
     //  *************** Service ********************
     private static final String SERVICE_STATE = "boolean_service_state";
