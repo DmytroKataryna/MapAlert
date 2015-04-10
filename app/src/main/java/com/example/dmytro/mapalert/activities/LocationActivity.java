@@ -163,7 +163,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
         locationItemActions = new ArrayList<>();
         recyclerView = (RecyclerView) findViewById(R.id.locationActionRecycleList);
-        adapter = new RecyclerViewActionAdapter(this, locationItemActions, recyclerView);
+        adapter = new RecyclerViewActionAdapter(locationItemActions, recyclerView);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
 

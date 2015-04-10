@@ -57,6 +57,7 @@ public class RepeatDialog {
         dialog.show();
     }
 
+    //convert Integers to String Text
     public String convertDays(TreeSet<Integer> selectedItems) {
         final CharSequence[] items =
                 {"Mon ", "Tue ", "Wed ", "Thu ", "Fri ", "Sat ", "Sun "};

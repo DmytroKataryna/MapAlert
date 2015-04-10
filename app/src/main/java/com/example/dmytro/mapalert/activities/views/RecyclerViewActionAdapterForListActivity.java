@@ -80,6 +80,7 @@ public class RecyclerViewActionAdapterForListActivity extends BaseAdapter {
         });
 
         holder.actionCheckBox.setChecked(action.isDone());
+        //check box listener / onCheckedChange Listener incorrectly , so i use OnClickListener
         holder.actionCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,7 +99,6 @@ public class RecyclerViewActionAdapterForListActivity extends BaseAdapter {
                 }
             }
         });
-
         return convertView;
     }
 

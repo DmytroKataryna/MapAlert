@@ -63,7 +63,7 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
         mAddButton = (FloatingActionButton) findViewById(R.id.fab_add_location);
 
         recyclerView = (RecyclerView) findViewById(R.id.locationRecycleList);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, locationItems, mAddButton);
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, locationItems);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
