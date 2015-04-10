@@ -220,6 +220,8 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         }
         latitude = loc.getLatitude();
         longitude = loc.getLongitude();
+
+        mDoneFAB.setImageResource(R.drawable.ic_image_repeat);
     }
 
     /////----------------------------------Photo Dialog  onActivityResult------------------------------------------
@@ -606,7 +608,11 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                     public void onPositive(MaterialDialog dialog) {
                         String result = ((EditText) dialog.getCustomView().findViewById(R.id.actionDialogEditText)).getText().toString();
                         if (!(result.length() > 0)) {
-                            Toast.makeText(getApplicationContext(), "Action field is required", Toast.LENGTH_SHORT).show();
+                            Toast toast = new Toast(getApplicationContext());
+                            toast.setDuration(Toast.LENGTH_SHORT);
+                            toast.setText("Action field is required");
+                            toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+                            toast.show();
                         } else {
                             int position = locationItemActions.size();
                             locationItemActions.add(position, new LocationItemAction(result, false));

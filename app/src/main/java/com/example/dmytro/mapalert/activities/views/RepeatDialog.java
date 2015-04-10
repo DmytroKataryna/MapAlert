@@ -2,7 +2,6 @@ package com.example.dmytro.mapalert.activities.views;
 
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.ColorDrawable;
@@ -49,11 +48,10 @@ public class RepeatDialog {
                 }).setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
                         mRepeatTextView.setText(convertDays(selectedItems));
-
                     }
                 }).create();
+
         //delete background
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         dialog.show();
@@ -73,7 +71,7 @@ public class RepeatDialog {
         }
         builder.append(">");
 
-        //+add Weekdays & Weekends when 0,1,2,3,4 selected and 5,6  selected
+        //+add Weekdays when 0,1,2,3,4 selected & Weekends when 5,6 selected
         return builder.toString();
     }
 }

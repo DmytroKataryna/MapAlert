@@ -80,6 +80,7 @@ public class BackgroundTimeService extends IntentService {
 
 
     public LocationTime convertCursorItemLocationToLocationTime(CursorLocation cursorLocations) {
+
         String[] time;
         TreeSet<Integer> selectedItems;
 

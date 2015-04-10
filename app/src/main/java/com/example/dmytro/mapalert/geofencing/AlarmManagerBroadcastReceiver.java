@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
@@ -33,6 +34,12 @@ public class AlarmManagerBroadcastReceiver extends BroadcastReceiver {
     }
 
     private void sendNotification(Context context, String title, String imagePath) {
+        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wakeLock = powerManager
+                .newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "MyWakelockTag");
+
+        wakeLock.acquire();
+
         // Create an explicit content Intent that starts the main Activity.
         Intent notificationIntent = new Intent(context, ListActivity.class);
 
@@ -53,6 +60,7 @@ public class AlarmManagerBroadcastReceiver extends BroadcastReceiver {
 
         builder.setSmallIcon(R.mipmap.ic_launcher)
                 .setDefaults(Notification.DEFAULT_ALL)
+                .setVibrate(new long[]{0, 100, 1000, 300, 200, 100, 500, 200, 100})
                 .setColor(Color.RED)
                 .setContentTitle("Check your " + title + " actions") //title
                 .setContentText("Tap here to see your location details information")
@@ -69,5 +77,7 @@ public class AlarmManagerBroadcastReceiver extends BroadcastReceiver {
 
         // Issue the notification
         mNotificationManager.notify(new Random().nextInt(1000), builder.build());
+
+        wakeLock.release();
     }
 }
