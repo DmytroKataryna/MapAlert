@@ -52,8 +52,8 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
                 .build();
 
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(30 * 1000);  //30 sec (just for test ) it should be 2 min
-        mLocationRequest.setFastestInterval(5 * 1000); //5 sec (just for test ) it should be 1.5 min
+        mLocationRequest.setInterval(60 * 1000);  //60 sec (just for test ) it should be 2 min
+        mLocationRequest.setFastestInterval(45 * 1000); //45 sec (just for test ) it should be 1.5 min
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
@@ -99,7 +99,6 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
 
     public Location getUserLocation() {
-//        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (location != null) {
             return location;
@@ -114,7 +113,7 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
     @Override
     public void onLocationChanged(Location location) {
         if (utils.isDataChanged()) updateLocationData();
-        
+
         checkForBelongingToArea(location, locationItems);
     }
 
@@ -123,8 +122,6 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
 
         for (LocationServiceItemConverted location : listOfLocations) {
             float distance = userCurrentLocation.distanceTo(location.getLocation());
-
-            //Toast.makeText(getApplicationContext(), "DIS " + distance, Toast.LENGTH_SHORT).show();
 
             //send notification that user enter area
             if (distance < RADIUS_IN_METERS && !location.isInside()) {
@@ -181,8 +178,6 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
             e.printStackTrace();
         }
         utils.setServiceDataChanged(false);
-
-        //dataSource.close();  крешиться в цьому місці
     }
 
     public void updateInsideStatus(Integer id, boolean inside) {
@@ -193,7 +188,5 @@ public class BackgroundLocationService extends Service implements GoogleApiClien
         else insideInt = 0;
         //get Data from DB
         dataSource.updateInsideStatus(id, insideInt);
-
-        //dataSource.close();  крешиться в цьому місці
     }
 }

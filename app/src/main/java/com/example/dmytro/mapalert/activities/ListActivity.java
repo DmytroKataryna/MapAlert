@@ -17,7 +17,6 @@ import android.widget.TextView;
 import com.example.dmytro.mapalert.R;
 import com.example.dmytro.mapalert.activities.views.RecyclerViewAdapter;
 import com.example.dmytro.mapalert.geofencing.BackgroundLocationService;
-import com.example.dmytro.mapalert.geofencing.BackgroundTimeService;
 import com.example.dmytro.mapalert.pojo.CursorLocation;
 import com.example.dmytro.mapalert.utils.LocationDataSource;
 import com.example.dmytro.mapalert.utils.PreferencesUtils;
@@ -26,11 +25,8 @@ import com.melnykov.fab.FloatingActionButton;
 import java.io.IOException;
 import java.util.List;
 
-//here i will place list of locations
-//temporarily, activity have just button that displays the number of  that are saved in DB
-public class ListActivity extends ActionBarActivity implements CompoundButton.OnCheckedChangeListener {
 
-    private static final String TAG = "ListActivityClass";
+public class ListActivity extends ActionBarActivity implements CompoundButton.OnCheckedChangeListener {
 
     private PreferencesUtils utils;
     private LocationDataSource dataSource;
@@ -38,6 +34,7 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
     private RecyclerView recyclerView;
 
     private FloatingActionButton mAddButton;
+
     //menu items
     private SwitchCompat mTrackSwitcher;
     private TextView mTrackTextView;
@@ -53,7 +50,7 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
         dataSource = LocationDataSource.get(getApplicationContext());
         dataSource.open();
 
-        //get Data from DB
+        //get List Location Data from DB
         try {
             locationItems = dataSource.getAllLocationItems();
         } catch (IOException | ClassNotFoundException e) {
@@ -61,10 +58,9 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
         }
 
         mAddButton = (FloatingActionButton) findViewById(R.id.fab_add_location);
-
         recyclerView = (RecyclerView) findViewById(R.id.locationRecycleList);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, locationItems);
 
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, locationItems);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
 
@@ -74,9 +70,7 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
 
         mAddButton.attachToRecyclerView(recyclerView);
 
-//        startService(new Intent(this, BackgroundTimeService.class));
-
-        if (!utils.isServiceAlive())
+        if (!utils.isServiceAlive())  //start geoLocation Service
             startService(new Intent(this, BackgroundLocationService.class));
     }
 
@@ -84,15 +78,15 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
     protected void onResume() {
         super.onResume();
         started = false;
-        if (mTrackSwitcher != null) {  //if service is alive set checked to true
+        if (mTrackSwitcher != null) {  //if service is alive set menu switcher checked to true
             mTrackSwitcher.setSelected(utils.isServiceAlive());
         }
-        //mAddButton.setActivated(true);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.list_location_menu, menu);
+        //get my custom menu item layout
         for (int i = 0; i < menu.size(); i++) {
             MenuItem item = menu.getItem(i);
             if (item.getItemId() == R.id.myswitch) {
@@ -113,15 +107,16 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
         return super.onCreateOptionsMenu(menu);
     }
 
-    //fab listener
+    //floating button listener
     public void addButtonListener(View view) {
+        //to prevent double click / set such construction
         if (!started) {
             startActivity(new Intent(this, LocationActivity.class));
         }
         started = true;
     }
 
-    //switcher listener
+    //menu switcher listener
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
@@ -133,11 +128,5 @@ public class ListActivity extends ActionBarActivity implements CompoundButton.On
             mTrackTextView.setTextColor(getResources().getColor(R.color.grey_50));
             utils.setServiceState(false);
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        dataSource.close();
     }
 }
