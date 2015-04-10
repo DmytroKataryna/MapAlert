@@ -48,6 +48,7 @@ public class LocationDataSource {
         dbHelper.close();
     }
 
+    //save location to DB ,
     public CursorLocation createLocation(LocationItem locationItem) throws IOException, ClassNotFoundException {
 
         ContentValues values = new ContentValues();
@@ -62,6 +63,7 @@ public class LocationDataSource {
         CursorLocation item = cursorToLocation(cursor);
         utils.setServiceDataChanged(true);
 
+        //start Time Service , which add all time data to AlarmManager
         if (locationItem.isTimeSelected()) {
             context.startService(new Intent(context, BackgroundTimeService.class).putExtra(BackgroundTimeService.LOCATION_DATA, item));
         }
@@ -69,6 +71,7 @@ public class LocationDataSource {
         return item;
     }
 
+    //update location
     public void updateLocation(int id, LocationItem locationItem) throws IOException {
 
         ContentValues values = new ContentValues();
@@ -76,6 +79,7 @@ public class LocationDataSource {
 
         sdb.update(DBHelper.DATABASE_TABLE, values, DBHelper.ID_COLUMN + "=" + id, null);
         utils.setServiceDataChanged(true);
+        //start Time Service depend on Time selected or not , send Boolean extra which responsible for deleting time data from Alarm Manager
         if (locationItem.isTimeSelected()) {
             context.startService(new Intent(context, BackgroundTimeService.class)
                     .putExtra(BackgroundTimeService.LOCATION_DATA, new CursorLocation(id, locationItem, 0)));
@@ -90,6 +94,7 @@ public class LocationDataSource {
         }
     }
 
+    //update Inside boolean field , which indicates whether there is a user inside area
     public void updateInsideStatus(int id, Integer insideStatus) {
         ContentValues values = new ContentValues();
         values.put(DBHelper.LOCATION_INSIDE_COLUMN, insideStatus);
@@ -99,7 +104,7 @@ public class LocationDataSource {
 
     //delete location from DB and also image from internal storage
     public void deleteLocation(Integer id, String imagePath, LocationItem item) {
-
+        //start Time Service , which delete time data from Alarm Manager
         context.startService(new Intent(context, BackgroundTimeService.class)
                 .putExtra(BackgroundTimeService.LOCATION_DATA, new CursorLocation(id, item, 0))
                 .putExtra(BackgroundTimeService.BOOLEAN_DELETE_ALARM, true));
@@ -109,6 +114,7 @@ public class LocationDataSource {
         utils.setServiceDataChanged(true);
     }
 
+    //get all location
     public List<CursorLocation> getAllLocationItems() throws IOException, ClassNotFoundException {
         List<CursorLocation> allLoc = new ArrayList<>();
 

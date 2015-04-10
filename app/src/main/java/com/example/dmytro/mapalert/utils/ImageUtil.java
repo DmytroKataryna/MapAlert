@@ -44,6 +44,7 @@ public class ImageUtil {
         return null;
     }
 
+    //crop image to round shape
     public static Bitmap getCroppedBitmap(Bitmap bitmap) {
         Bitmap output;
 
@@ -59,7 +60,7 @@ public class ImageUtil {
         final Paint paint = new Paint();
         final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
 
-        float r = 0;
+        float r;
 
         if (bitmap.getWidth() > bitmap.getHeight()) {
             r = bitmap.getHeight() / 2;

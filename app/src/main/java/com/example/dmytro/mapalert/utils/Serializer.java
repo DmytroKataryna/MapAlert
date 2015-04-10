@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+// serialize & deserialize objects
 public class Serializer {
 
     public static byte[] serialize(Object obj) throws IOException {

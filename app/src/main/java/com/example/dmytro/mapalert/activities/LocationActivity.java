@@ -63,12 +63,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
 
-//Я старався повиносити частини коду в інші класи , бо цей вийшов дуже занадто громіздкий
-//ще не чистив код (будуть попадатися зміні які не використовують і т.д.)
+
 public class LocationActivity extends ActionBarActivity implements OnMapReadyCallback, View.OnClickListener, CompoundButton.OnCheckedChangeListener,
         TimePicker.OnTimeChangedListener, View.OnFocusChangeListener, GoogleApiClient.ConnectionCallbacks, View.OnTouchListener {
-
-    private static final String TAG = "LocationActivity";
 
     private static Integer dataBaseId;
     private GoogleApiClient mApiClient;
@@ -79,7 +76,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
     private LocationDataSource dataSource;
     private GoogleMap mGoogleMap;
-    private EditText mSearchEditText, mTitleEditText, mDescriptionEditText;
+    private EditText mSearchEditText, mTitleEditText;
     private TimePicker mTimePicker;
     private TextView mRepeatTextView;
     private SwitchCompat mTimeSwitch;
@@ -98,7 +95,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     //Location object
     private LocationItem loc;
     private String mTitle;
-    private List<LocationItemAction> mActions;
     private double latitude;
     private double longitude;
     private boolean mTimeSelected;
@@ -163,7 +159,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
         locationItemActions = new ArrayList<>();
         recyclerView = (RecyclerView) findViewById(R.id.locationActionRecycleList);
-        adapter = new RecyclerViewActionAdapter(this, locationItemActions, recyclerView);
+        adapter = new RecyclerViewActionAdapter(locationItemActions, recyclerView);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
 
@@ -184,7 +180,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
 
         selectAllOptionsInsideRepeatDialog(selectedItems, checkedDialogItems);
 
-        //start edit mode (restore data )
+        //start edit mode (restore data)
         if (getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false))
             restoreData();
     }
@@ -221,6 +217,7 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         latitude = loc.getLatitude();
         longitude = loc.getLongitude();
 
+        //in edit mode FAB has different icon
         mDoneFAB.setImageResource(R.drawable.ic_image_repeat);
     }
 
@@ -255,12 +252,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                         }
                     });
                     imagePath = imagePathFile.getPath();
-
-//                    Picasso picasso = Picasso.with(getApplicationContext());
-//                    picasso.invalidate(imagePathFile);
-//                    picasso.load(imagePathFile).placeholder(R.mipmap.ic_action_house)
-//                            .into(mLocPhoto);
-
                     break;
 
                 case SELECT_FILE:
@@ -274,8 +265,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                     bitmap = ImageUtil.getCroppedBitmap(ImageUtil.decodeFile(selectedImagePath));  // create Bitmap
                     imagePathFile = ImageUtil.saveToInternalStorage(getApplicationContext(), bitmap);
 
-                    //mLocPhoto.setImageBitmap(bitmap);
-
                     mLocPhoto.post(new Runnable() {
                         @Override
                         public void run() {
@@ -283,10 +272,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                         }
                     });
                     imagePath = imagePathFile.getPath();
-
-//                    Picasso.with(getApplicationContext()).load(imagePathFile)
-//                            .placeholder(R.mipmap.ic_action_house)
-//                            .into(mLocPhoto);
                     break;
             }
         }
@@ -324,22 +309,24 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                 longitude = location.longitude;
                 break;
 
-            //change scroll view position
+            //change scroll view position to TOP
             case R.id.headLayout:
                 scrollView.scrollTo(scrollView.getTop(), scrollView.getTop());
                 mHeadLayout.setFocusable(true);
                 break;
 
+            //save/update data to DB
             case R.id.fab_save_update_location:
+                //title is required field / so doesn't save location if title field is empty
                 if (!checkIfAvailableToLogin()) return;
 
                 if (imagePath == null) //if nothing selected , save default img
                     imagePath = "drawable://" + R.drawable.ic_image_camera;
 
-                if (mTimeSelected) { //depends on time switcher selection , it is saved different object
-                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);     // get data from recycler view and save list actions to db
+                if (mTimeSelected) { //depends on time switcher selection , we save different object
+                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);     // construct Location Item Object
                 } else {
-                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, latitude, longitude);  // get data from recycler view and save list actions to db
+                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, latitude, longitude);  // construct Location Item Object
                 }
 
                 try { //create or update location
@@ -368,37 +355,14 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            //Delete menu item listener (delete from DB in Edit Mode, or return back in Create Mode)
             case R.id.delete:
-
                 if (loc != null) {
                     dataSource.deleteLocation(dataBaseId, loc.getImagePath(), loc);
                     startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                 } else {
                     onBackPressed();
                 }
-//                if (!checkIfAvailableToLogin()) return false;
-//
-//                if (imagePath == null) //if nothing selected , save default img
-//                    imagePath = "drawable://" + R.drawable.ic_image_camera;
-//
-//                if (mTimeSelected) { //depends on time switcher selection , it is saved different object
-//                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, selectedItems, mTime, latitude, longitude);     // get data from recycler view and save list actions to db
-//                } else {
-//                    loc = new LocationItem(mTitle, locationItemActions, mTimeSelected, imagePath, latitude, longitude);  // get data from recycler view and save list actions to db
-//                }
-//
-//
-//                try { //create or update location
-//                    if (!getIntent().getBooleanExtra(RecyclerViewAdapter.ITEM_EDIT_MODE, false)) {
-//                        dataSource.createLocation(loc);
-//                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-//                    } else {
-//                        dataSource.updateLocation(dataBaseId, loc);
-//                        startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-//                    }
-//                } catch (IOException | ClassNotFoundException e) {
-//                    e.printStackTrace();
-//                }
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -424,16 +388,16 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         hideSoftKeyboard();
-        //if switcher ON TimePicker and RepeatEditText is visible
+        //if switcher ON TimePicker and RepeatEditText is visible  and Map Fragment GONE
         if (mTimeSwitch.isChecked()) {
             mTimeSelected = true;
-            mTimeLayout.setVisibility(View.VISIBLE);
-            mBottomLayout.setVisibility(View.GONE);
+            mTimeLayout.setVisibility(View.VISIBLE);  // Time Card View
+            mBottomLayout.setVisibility(View.GONE);  // Map Fragment Card View
             mTime = mTimePicker.getCurrentHour() + " : " + mTimePicker.getCurrentMinute();
         } else {
             mTimeSelected = false;
-            mTimeLayout.setVisibility(View.GONE);
-            mBottomLayout.setVisibility(View.VISIBLE);
+            mTimeLayout.setVisibility(View.GONE);  // Time Card View
+            mBottomLayout.setVisibility(View.VISIBLE);  // Map Fragment Card View
         }
     }
 
@@ -499,7 +463,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
     public void onConnectionSuspended(int i) {
         // The connection to Google Play services was lost for some reason. We call connect() to
         // attempt to re-establish the connection.
-        Log.i(TAG, "Connection suspended");
         mApiClient.connect();
     }
 
@@ -542,13 +505,6 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
                 locationMarker = googleMap.addMarker(new MarkerOptions().position(latLng));
                 latitude = latLng.latitude;
                 longitude = latLng.longitude;
-            }
-        });
-
-        googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-            @Override
-            public void onMyLocationChange(Location location) {
-                //compare this coordinates with location coordinate and if user is out of area send notification
             }
         });
     }
