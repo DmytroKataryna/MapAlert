@@ -364,6 +364,12 @@ public class LocationActivity extends ActionBarActivity implements OnMapReadyCal
         switch (item.getItemId()) {
             case R.id.delete:
 
+                if (loc != null) {
+                    dataSource.deleteLocation(dataBaseId, loc.getImagePath(), loc);
+                    startActivity(new Intent(this, ListActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                } else {
+                    onBackPressed();
+                }
 //                if (!checkIfAvailableToLogin()) return false;
 //
 //                if (imagePath == null) //if nothing selected , save default img
